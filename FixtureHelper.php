@@ -33,8 +33,7 @@ class FixtureHelper
         $faker->addProvider(new Picture($faker));
 
         /* ------------------------ pour utiliser les icones ------------------------ */
-        $icones = json_decode(file_get_contents('./assets/fontawesome5.json'));
-        $icones = json_decode(file_get_contents('./assets/gists_bootstrap_icons/list.json'));
+        $icones = json_decode(file_get_contents('/app/src/Twig/base/gists/list.json'));
         foreach (explode(';', $options) as $option) {
             $exp = explode(':', $option);
             $exp[1] = isset($exp[1]) ? $exp[1] : '';
