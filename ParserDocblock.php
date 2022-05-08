@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\base;
 
 use Symfony\Component\Config\Definition\Exception\Exception;
 use ReflectionClass;

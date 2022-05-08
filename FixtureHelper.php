@@ -1,11 +1,7 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\base;
 
-use App\Entity\Temppage;
-use App\Factory\TempnbrtemplateFactory;
-use App\Factory\TemppageFactory;
-use App\Factory\TempvaleurFactory;
 use Faker\Factory;
 use WW\Faker\Provider\Picture;
 
@@ -94,7 +90,6 @@ class FixtureHelper
         $fakeren = Factory::create('en_GB');
 
         /* ------------------------ pour utiliser les icones ------------------------ */
-        $icones = json_decode(file_get_contents('./assets/fontawesome5.json'));
         $icones = json_decode(file_get_contents('./assets/gists_bootstrap_icons/list.json'));
         if (strpos($champ, '_')) {
             switch (explode('_', $champ)[1]) {

@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\base;
 
 use App\Repository\ParametresRepository;
 use Doctrine\ORM\EntityManagerInterface;

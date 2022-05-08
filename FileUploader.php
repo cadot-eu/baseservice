@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Service;
+namespace App\Service\base;
 
 use Psr\Log\LoggerInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
