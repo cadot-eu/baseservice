@@ -15,44 +15,20 @@ class FixtureHelper
      */
     public static function generate(mixed $champ)
     {
-        $options = null;
-        $label = '';
-        $type = '';
-        //if array send
-        if (is_array($champ)) {
-            foreach ($champ as $key => $value) {
-                $$key = $value;
-            }
-        } else {
-            $options = $champ->getOptions();
-            $label = $champ->getLabel();
-            $type = $champ->getType();
-        }
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create();
         $faker->addProvider(new Picture($faker));
 
         /* ------------------------ pour utiliser les icones ------------------------ */
         $icones = json_decode(file_get_contents('/app/src/Twig/base/gists/list.json'));
-        foreach (explode(';', $options) as $option) {
-            $exp = explode(':', $option);
-            $exp[1] = isset($exp[1]) ? $exp[1] : '';
-            $champoptions[$exp[0]] = $exp[1];
-        }
-        switch ($type) {
+        switch ($champ) {
             case 'image':
+                @mkdir('public/uploads/fixtures/');
                 return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
                 break;
-            case 'phrase':
+            case 'youtube':
                 //on regarde si le nom du label est spécial youtube...
-                switch (true) {
-                    case stristr($label, 'youtube'):
-                        return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-                        break;
-                    default:
-                        return $faker->text(10);
-                        break;
-                }
+                return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
                 break;
             case 'float':
                 return $faker->randomFloat(2);
@@ -65,17 +41,6 @@ class FixtureHelper
                 break;
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
-                break;
-            case 'choix':
-                foreach (explode(',', $champoptions['choix']) as $oc) {
-                    $exp = explode('=', $oc);
-                    $exp[1] = isset($exp[1]) ? $exp[1] : '';
-                    $ocs[$exp[0]] = $exp[1];
-                }
-                return $faker->randomElement($ocs);
-                break;
-            default:
-                return 'erreur sur le type';
                 break;
         }
     }
