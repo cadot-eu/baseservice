@@ -35,7 +35,7 @@ class ToolsHelper
      */
     public static function wikipedia_article_random()
     {
-        if (! function_exists('curl_init')) {
+        if (!function_exists('curl_init')) {
             return false;
         }
         $url = 'https://en.wikipedia.org/api/rest_v1/page/random/html';
