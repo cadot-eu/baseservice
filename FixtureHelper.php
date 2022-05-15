@@ -7,28 +7,26 @@ use WW\Faker\Provider\Picture;
 
 class FixtureHelper
 {
-    /**
-     * A function that generates a value for a field.
-     *
-     *  @param champ float,texte,image,phrase,texte,texte_mark,icone et choix
-     *  appelé directement par champ ['type'=>'texte']
-     */
-    public static function generate(mixed $champ)
+
+
+    public static function generate(string $champ, $lang = 'fr_FR')
     {
+
         /* ------------------- pour utiliser les images de picsum ------------------- */
-        $faker = Factory::create();
+        $faker = Factory::create($lang);
         $faker->addProvider(new Picture($faker));
 
         /* ------------------------ pour utiliser les icones ------------------------ */
         $icones = json_decode(file_get_contents('/app/src/Twig/base/gists/list.json'));
         switch ($champ) {
             case 'image':
-                @mkdir('public/uploads/fixtures/');
                 return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
                 break;
             case 'youtube':
-                //on regarde si le nom du label est spécial youtube...
                 return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
+                break;
+            case 'phrase':
+                return $faker->text(10);
                 break;
             case 'float':
                 return $faker->randomFloat(2);
@@ -42,46 +40,9 @@ class FixtureHelper
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
                 break;
-        }
-    }
-
-    public static function gen_by_name(string $champ)
-    {
-
-        /* ------------------- pour utiliser les images de picsum ------------------- */
-        $faker = Factory::create();
-        $faker->addProvider(new Picture($faker));
-        $fakeren = Factory::create('en_GB');
-
-        /* ------------------------ pour utiliser les icones ------------------------ */
-        $icones = json_decode(file_get_contents('./assets/gists_bootstrap_icons/list.json'));
-        if (strpos($champ, '_')) {
-            switch (explode('_', $champ)[1]) {
-                case 'image':
-                    return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
-                    break;
-                case 'youtube':
-                    return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-                    break;
-                case 'phrase':
-                    return $faker->text(10);
-                    break;
-                case 'float':
-                    return $faker->randomFloat(2);
-                    break;
-                case 'texte':
-                    return $faker->text();
-                    break;
-                case 'texte_mark':
-                    return $faker->text(20) . '<mark>' . $faker->colorName() . '</mark>' . $faker->text(20);
-                    break;
-                case 'icone':
-                    return 'bi-' . $faker->randomElement($icones);
-                    break;
-                default:
-                    return null;
-                    break;
-            }
+            default:
+                return null;
+                break;
         }
     }
 
