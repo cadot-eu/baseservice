@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'choice', 'choiceenplace', 'entity', 'collection', 'color', 'password', 'hidden', 'image', 'money'])
+    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'choice', 'choiceenplace', 'entity', 'collection', 'color', 'password', 'hidden', 'image', 'money', 'nocrud'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
@@ -31,6 +31,10 @@ class ParserDocblock
             $this->selects[$name] = $alias != '' ? $alias : $type;
             $this->properties[$name] = $property;
         }
+        // on s'arrête dans le cas d'un nocrud
+        if ($this->alias['id'] == 'nocrud') {
+            dd('Protection par NOCRUD');
+        };
     }
 
     /**
