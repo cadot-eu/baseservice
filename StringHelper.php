@@ -93,4 +93,23 @@ class StringHelper
         preg_match_all("/<$balise [^>]+>(.*)<$end/", $string, $match);
         return $match;
     }
+    static function  removeStart($string, $substring, $trimonsubstring = false)
+    {
+        $substring = $trimonsubstring ? trim($substring) : $substring;
+        if (substr(trim($string), 0, strlen($substring)) == $substring)
+            return substr(trim($string), strlen($substring));
+        else return $string;
+    }
+    static function  removeEnd($string, $substring, $trimonsubstring = false)
+    {
+        $substring = $trimonsubstring ? trim($substring) : $substring;
+        if (substr(trim($string), -strlen($substring) - 1) == $substring)
+            return substr(trim($string), 0, strlen(trim($string)) - strlen($substring));
+        else return $string;
+    }
+    static function removeStartAndEnd($string, $substring, $endsubstring = '', $trimonsubstring = false)
+    {
+        $endsubstring = $endsubstring == '' ? $substring : $endsubstring;
+        return StringHelper::removeEnd(StringHelper::removeStart($string, $substring, $trimonsubstring), $endsubstring, $trimonsubstring);
+    }
 }
