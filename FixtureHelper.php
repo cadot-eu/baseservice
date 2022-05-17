@@ -7,52 +7,26 @@ use WW\Faker\Provider\Picture;
 
 class FixtureHelper
 {
-    /**
-     * A function that generates a value for a field.
-     *
-     *  @param champ float,texte,image,phrase,texte,texte_mark,icone et choix
-     *  appelé directement par champ ['type'=>'texte']
-     */
-    public static function generate(mixed $champ)
+
+
+    public static function generate(string $champ, $lang = 'fr_FR')
     {
-        $options = null;
-        $label = '';
-        $type = '';
-        //if array send
-        if (is_array($champ)) {
-            foreach ($champ as $key => $value) {
-                $$key = $value;
-            }
-        } else {
-            $options = $champ->getOptions();
-            $label = $champ->getLabel();
-            $type = $champ->getType();
-        }
+
         /* ------------------- pour utiliser les images de picsum ------------------- */
-        $faker = Factory::create();
+        $faker = Factory::create($lang);
         $faker->addProvider(new Picture($faker));
 
         /* ------------------------ pour utiliser les icones ------------------------ */
         $icones = json_decode(file_get_contents('/app/src/Twig/base/gists/list.json'));
-        foreach (explode(';', $options) as $option) {
-            $exp = explode(':', $option);
-            $exp[1] = isset($exp[1]) ? $exp[1] : '';
-            $champoptions[$exp[0]] = $exp[1];
-        }
-        switch ($type) {
+        switch ($champ) {
             case 'image':
                 return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
                 break;
+            case 'youtube':
+                return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
+                break;
             case 'phrase':
-                //on regarde si le nom du label est spécial youtube...
-                switch (true) {
-                    case stristr($label, 'youtube'):
-                        return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-                        break;
-                    default:
-                        return $faker->text(10);
-                        break;
-                }
+                return $faker->text(10);
                 break;
             case 'float':
                 return $faker->randomFloat(2);
@@ -66,57 +40,9 @@ class FixtureHelper
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
                 break;
-            case 'choix':
-                foreach (explode(',', $champoptions['choix']) as $oc) {
-                    $exp = explode('=', $oc);
-                    $exp[1] = isset($exp[1]) ? $exp[1] : '';
-                    $ocs[$exp[0]] = $exp[1];
-                }
-                return $faker->randomElement($ocs);
-                break;
             default:
-                return 'erreur sur le type';
+                return null;
                 break;
-        }
-    }
-
-    public static function gen_by_name(string $champ)
-    {
-
-        /* ------------------- pour utiliser les images de picsum ------------------- */
-        $faker = Factory::create();
-        $faker->addProvider(new Picture($faker));
-        $fakeren = Factory::create('en_GB');
-
-        /* ------------------------ pour utiliser les icones ------------------------ */
-        $icones = json_decode(file_get_contents('./assets/gists_bootstrap_icons/list.json'));
-        if (strpos($champ, '_')) {
-            switch (explode('_', $champ)[1]) {
-                case 'image':
-                    return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
-                    break;
-                case 'youtube':
-                    return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-                    break;
-                case 'phrase':
-                    return $faker->text(10);
-                    break;
-                case 'float':
-                    return $faker->randomFloat(2);
-                    break;
-                case 'texte':
-                    return $faker->text();
-                    break;
-                case 'texte_mark':
-                    return $faker->text(20) . '<mark>' . $faker->colorName() . '</mark>' . $faker->text(20);
-                    break;
-                case 'icone':
-                    return 'bi-' . $faker->randomElement($icones);
-                    break;
-                default:
-                    return null;
-                    break;
-            }
         }
     }
 

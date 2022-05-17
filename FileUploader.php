@@ -7,6 +7,8 @@ use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
 use Symfony\Component\HttpFoundation\File\Exception\FileException;
 use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
+use Symfony\Component\HttpFoundation\File\File;
+use Symfony\Component\Filesystem\Filesystem;
 
 class FileUploader
 {
@@ -23,11 +25,22 @@ class FileUploader
         $this->parameterBag = $parameterBag;
     }
 
-    public function upload(UploadedFile $file, $dir = '')
+    public function upload(File $file, $dir = '', $copy_no_move = false)
     {
-        $originalFilename = pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME);
+        if ($copy_no_move) {
+            $fs = new Filesystem();
+            $targetPath = sys_get_temp_dir() . '/' . uniqid();
+            $fs->copy($file, $targetPath, true);
+            $file = new File($targetPath);
+        }
+        if ($file instanceof UploadedFile) {
+            $originalFilename = $file->getClientOriginalName();
+        } else {
+            $originalFilename = $file->getFilename();
+        }
+
         $safeFilename = $this->slugger->slug($originalFilename);
-        $extension = $this->fileExtension($file->getClientOriginalName());
+        $extension = $this->fileExtension($originalFilename);
         $fileName = $safeFilename . '¤' . uniqid() . '.' . $extension;
 
         try {
