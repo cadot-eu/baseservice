@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'choice', 'choiceenplace', 'entity', 'collection', 'color', 'password', 'hidden', 'image', 'money', 'nocrud', 'telephone', 'siret'])
+    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'normal', 'choice', 'choiceenplace', 'entity', 'collection', 'color', 'password', 'hidden', 'image', 'money', 'nocrud', 'telephone', 'siret'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
