@@ -112,4 +112,27 @@ class StringHelper
         $endsubstring = $endsubstring == '' ? $substring : $endsubstring;
         return StringHelper::removeEnd(StringHelper::removeStart($string, $substring, $trimonsubstring), $endsubstring, $trimonsubstring);
     }
+    static function keywords($string, $number = 10)
+    {
+
+        $stopwords = array();
+        //$string = preg_replace('/[\pP]/u', '', trim(preg_replace('/\s\s+/iu', '', mb_strtolower($string))));
+        $matchWords = array_filter(explode(' ', $string), function ($item) use ($stopwords) {
+            return !($item == '' || in_array($item, $stopwords) || mb_strlen($item) <= 2 || is_numeric($item));
+        });
+        $wordCountArr = array_count_values($matchWords);
+        arsort($wordCountArr);
+        $mots = "des,les,est,un,une,le,de,pour,qui,que,quoi,ou,donc,or,ni,car,parce,lequel,laquelle,lesquelles,sur,par,je,tu,il,nous,vous,il,ils,elles,plus,pas,ne,ni,sont,dans,tous,tout,ont,avec,pour,contre,mais,sans,au,à,qu'une,qu'un,qu',ce,ces,se,ses,comme,d'un,d'une,fois,leur,leurs,oui,non,moins,dont";
+        $tab = [];
+        foreach ($wordCountArr as $w => $val) {
+            $w = strtolower($w);
+            if (preg_match('/<|>|=/i', $w) == 0)
+                if (!in_array($w, explode(',', $mots))) {
+                    if (strlen($w) != strlen(utf8_decode($w)))
+                        $w = json_decode(str_replace('\x', '\u00', $w));
+                    $tab[$w] = $val;
+                }
+        }
+        return array_keys(array_slice($tab, 0, $number));
+    }
 }
