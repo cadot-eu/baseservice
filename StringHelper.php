@@ -122,15 +122,15 @@ class StringHelper
         });
         $wordCountArr = array_count_values($matchWords);
         arsort($wordCountArr);
-        $mots = "des,les,est,un,une,le,de,pour,qui,que,quoi,ou,donc,or,ni,car,parce,lequel,laquelle,lesquelles,sur,par,je,tu,il,nous,vous,il,ils,elles,plus,pas,ne,ni,sont,dans,tous,tout,ont,avec,pour,contre,mais,sans,au,à,qu'une,qu'un,qu',ce,ces,se,ses,comme,d'un,d'une,fois,leur,leurs,oui,non,moins,dont";
+        $mots = "des,les,est,un,une,le,de,pour,qui,que,quoi,ou,donc,or,ni,car,parce,lequel,laquelle,lesquelles,sur,par,je,tu,il,nous,vous,il,ils,elles,plus,pas,ne,ni,sont,dans,tous,tout,ont,avec,pour,contre,mais,sans,au,à,qu'une,qu'un,qu',ce,ces,se,ses,comme,d'un,d'une,fois,leur,leurs,oui,non,moins,dont,aux,n'est,lorsque,faire";
         $tab = [];
         foreach ($wordCountArr as $w => $val) {
-            $w = strtolower($w);
-            if (preg_match('/<|>|=/i', $w) == 0)
+            $w = strtolower(trim($w));
+            if (preg_match('/<|>|\)|\(|=|&|;/i', $w) == 0)
                 if (!in_array($w, explode(',', $mots))) {
                     if (strlen($w) != strlen(utf8_decode($w)))
                         $w = json_decode(str_replace('\x', '\u00', $w));
-                    $tab[$w] = $val;
+                    if ($w) $tab[$w] = $val;
                 }
         }
         return array_keys(array_slice($tab, 0, $number));
