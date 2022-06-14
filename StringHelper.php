@@ -126,7 +126,7 @@ class StringHelper
         $tab = [];
         foreach ($wordCountArr as $w => $val) {
             $w = strtolower(trim($w));
-            if (preg_match('/<|>/i', $w) == 0)
+            if (preg_match('/<|>|&/i', $w) == 0)
                 if (!in_array($w, explode(',', $mots))) {
                     if ($w) $tab[$w] = $val;
                 }
