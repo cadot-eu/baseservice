@@ -13,7 +13,7 @@ class HtmlHelper
      * 
      * @return the string with the html tags removed.
      */
-    static  function remove_html_tags($html_string, $html_tags)
+    static  function remove_html_tags($html_string, $html_tags): string
     {
         $tagStr = "";
 
