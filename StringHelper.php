@@ -122,7 +122,7 @@ class StringHelper
         });
         $wordCountArr = array_count_values($matchWords);
         arsort($wordCountArr);
-        $mots = "des,les,est,un,une,le,de,pour,qui,que,quoi,ou,donc,or,ni,car,parce,lequel,laquelle,lesquelles,sur,par,je,tu,il,nous,vous,il,ils,elles,plus,pas,ne,ni,sont,dans,tous,tout,ont,avec,pour,contre,mais,sans,au,à,qu'une,qu'un,qu',ce,ces,se,ses,comme,d'un,d'une,fois,leur,leurs,oui,non,moins,dont,aux,n'est,lorsque,faire,son,fais,fait,la,les,entre,doivent,être";
+        $mots = "des,les,est,un,une,le,de,pour,qui,que,quoi,ou,donc,or,ni,car,parce,lequel,laquelle,lesquelles,sur,par,je,tu,il,nous,vous,il,ils,elles,plus,pas,ne,ni,sont,dans,tous,tout,ont,avec,pour,contre,mais,sans,au,à,qu'une,qu'un,qu',ce,ces,se,ses,comme,d'un,d'une,fois,leur,leurs,oui,non,moins,dont,aux,n'est,lorsque,faire,son,fais,fait,la,les,entre,doivent,être,à, a, soit, mais, ou, et, car, ni, puisque, que, parce que, ainsi que, alors que, afin que, à moins que, si comme, pendant, à condition, c’est-à-dire, alors que, dès, le, la, les, un, une, des, du, de la, des, peut, effet, toutes,très, verte, font, même";
         $tab = [];
         foreach ($wordCountArr as $w => $val) {
             $w = strtolower(trim($w));
