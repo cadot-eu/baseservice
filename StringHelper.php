@@ -112,7 +112,7 @@ class StringHelper
         $endsubstring = $endsubstring == '' ? $substring : $endsubstring;
         return StringHelper::removeEnd(StringHelper::removeStart($string, $substring, $trimonsubstring), $endsubstring, $trimonsubstring);
     }
-    static function keywords($string, $number = 10)
+    static function keywords($string, $number = 10): array
     {
         $string = strip_tags($string);
         $stopwords = array();
