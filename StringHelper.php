@@ -65,7 +65,7 @@ class StringHelper
      */
     static function balise_extract(string $string, string $balise): array
     {
-        preg_match("/<$balise [^>]+>(.*)<\/$balise>/", $string, $match);
+        preg_match("/<$balise.*?>(.*)<\/$balise>/", $string, $match);
         return $match;
     }
     /**
