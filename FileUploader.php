@@ -38,10 +38,10 @@ class FileUploader
         } else {
             $originalFilename = $file->getFilename();
         }
-
-        $safeFilename = $this->slugger->slug($originalFilename);
+        //majsucule minuscule, accents conservés et ' remplacé par _ et les autres remplacé par - idem pour _
+        $safeFilename = trim(preg_replace('/[^A-Za-zÀ-ÿ0-9-_]+/', '-', str_replace(["_", "'"], ["-", "_"], $originalFilename))); // iconv('UTF-8', 'ASCII//TRANSLIT//IGNORE', ($originalFilename))));
         $extension = $this->fileExtension($originalFilename);
-        $fileName = $safeFilename . '¤' . uniqid() . '.' . $extension;
+        $fileName = $safeFilename . '.' . uniqid() . '.' . $extension;
 
         try {
             $sdir = $this->slugger->slug($dir);
