@@ -3,6 +3,7 @@
 namespace App\Service\base;
 
 use App\Repository\ParametresRepository;
+use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
 
@@ -86,7 +87,7 @@ class ToolsHelper
     {
         $tab = [];
         foreach ($em->getRepository('App:Parametres')->findAll() as $parametre) {
-            $tab[$parametre->getNom()] = $parametre->getValeur();
+            $tab[AllExtension::ckclean($parametre->getNom())] = AllExtension::ckclean($parametre->getValeur());
         }
         return $tab;
     }
