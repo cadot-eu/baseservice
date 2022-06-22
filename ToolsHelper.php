@@ -87,7 +87,7 @@ class ToolsHelper
     {
         $tab = [];
         foreach ($em->getRepository('App:Parametres')->findAll() as $parametre) {
-            $tab[AllExtension::ckclean($parametre->getNom())] = AllExtension::ckclean($parametre->getValeur());
+            $tab[AllExtension::ckclean($parametre->getSlug())] = AllExtension::ckclean($parametre->getValeur());
         }
         return $tab;
     }
