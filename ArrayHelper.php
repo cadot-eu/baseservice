@@ -19,4 +19,17 @@ class ArrayHelper
 
         return array_keys($keys) !== $keys;
     }
+    /**
+     * move a element in other position 
+     * 
+     * @param array The array you want to move an element in.
+     * @param a The index of the element to move.
+     * @param b The index of the element to move.
+     */
+    public static function moveElement($array, $a, $b)
+    {
+        $out = array_splice($array, $a, 1);
+        array_splice($array, $b, 0, $out);
+        return $array;
+    }
 }
