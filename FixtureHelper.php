@@ -11,7 +11,6 @@ class FixtureHelper
 
     public static function generate(string $champ, $lang = 'fr_FR')
     {
-        dd('no fixtures');
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
         $faker->addProvider(new Picture($faker));
