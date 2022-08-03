@@ -39,10 +39,10 @@ class FileUploader
             $originalFilename = $file->getFilename();
         }
         //majsucule minuscule, accents conservés et ' remplacé par _ et les autres remplacé par - idem pour _
-        $safeFilename = $this->slugger->slug($originalFilename);
+
+        $safeFilename = $this->slugger->slug(str_replace([' ', '_', '.', "'", '-'], ['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], $this->fileName($originalFilename)));
         $extension = $this->fileExtension($originalFilename);
         $fileName = $safeFilename . '.' . uniqid() . '.' . $extension;
-
         try {
             $sdir = $this->slugger->slug($dir);
             $destDir = "/app/public/uploads/" . $sdir;
@@ -65,5 +65,17 @@ class FileUploader
     {
         $n = strrpos($s, ".");
         return ($n === false) ? "" : substr($s, $n + 1);
+    }
+    private function fileName($s)
+    {
+        $n = strrpos($s, ".");
+        return ($n === false) ? $s : substr($s, 0, $n);
+    }
+    static function cleanname($string)
+    {
+        $info = pathinfo($string);
+        $point = strrpos($info['filename'], ".");
+        $filename = substr($info['filename'], 0, $point);
+        return str_replace(['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], [' ', '_', '.', "'", '-'],  $filename . '.' . $info['extension']);
     }
 }
