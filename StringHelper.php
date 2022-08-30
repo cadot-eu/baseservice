@@ -4,13 +4,25 @@ namespace App\Service\base;
 
 class StringHelper
 {
+
+    static function replaceWith($string, $search, $replace, $casse = false)
+    {
+        $start = 0;
+        while ($pos = strpos($casse ? strtolower($string) : $string, $casse ? strtolower($search) : $search, $start) !== false) {
+            $string = substr($string, 0, $pos) . $replace . substr($string, $pos + strlen($search));
+            $start = $pos + strlen($replace);
+        }
+        return $string;
+    }
+
     /**
-     * To extract a string between 2 strings or characters
-     *
-     * @param string $string    chaine
-     * @param string $stringdeb chaine de début
-     * @param string $stringfin chaine de fin
-     * @return string
+     * It extracts a string from a string
+     * 
+     * @param string The string to search in.
+     * @param stringdeb The string that marks the beginning of the string you want to extract.
+     * @param stringfin The string that marks the end of the string you want to extract.
+     * 
+     * @return string a string.
      */
     static function chaine_extract($string, $stringdeb, $stringfin): string
     {
@@ -22,22 +34,34 @@ class StringHelper
     }
 
     /**
-     * chaine_remplace
-     * example chaine_remplace($html, 'background-image', ')', 'background-image: url({{file' . $file  . '}})');  
-     * @param  string $html
-     * @param  string $debs
-     * @param  string $fins
-     * @param  string $chaine
-     * @param  int $start
-     * @return string
+     * It replaces a string between two other strings
+     * 
+     * @param string html the string to be modified
+     * @param string debs The string that will be replaced
+     * @param string fins The end of the string to be replaced.
+     * @param string chaine The string to be replaced
+     * @param int start the position to start searching from
+     * @param bool casse if true, the search is case insensitive
+     * 
+     * @return string the string with the replaced text.
      */
-    static function chaine_remplace(string $html, string $debs, string $fins, string $chaine, int $start = 0): string
+    static function chaine_remplace(string $html, string $debs, string $fins, string $chaine, int $start = 0, bool $casse = false): string
     {
-        $pos = strpos($html, $debs, $start);
-        $fin = strpos($html, $fins, $pos + 1);
+        $pos = strpos($casse ? strtolower($html) : $html, $casse ? strtolower($debs) : $debs, $start);
+        $fin = strpos($casse ? strtolower($html) : $html, $casse ? strtolower($fins) : $fins, $pos + 1);
         return $html = substr($html, $start, $pos) . $chaine . substr($html, $fin + 1);
     }
 
+    /**
+     * It returns the string between two other strings
+     * 
+     * @param str The string to search in.
+     * @param pos The position to start searching from.
+     * @param start The string to start from.
+     * @param end The end of the string to extract.
+     * 
+     * @return the string between the start and end strings.
+     */
     static function extract($str, $pos, $start, $end = '')
     {
         if ($end == '') $end = $start;
@@ -48,6 +72,16 @@ class StringHelper
     }
 
 
+    /**
+     * It inserts a string into another string at a specified position
+     * 
+     * @param chaine the string to be modified
+     * @param strdeb The string to search for.
+     * @param insert The string to insert
+     * @param after true = insert after the string, false = insert before the string
+     * 
+     * @return The string with the inserted string.
+     */
     static function insert($chaine, $strdeb, $insert, $after = true)
     {
         if ($after) $pos = strpos((string)$chaine, $strdeb) + strlen($strdeb);
@@ -56,29 +90,65 @@ class StringHelper
     }
 
 
-    /**
-     * Retrieves a text between a tag (EXAMPLE <H1> Text </ H1>
-     *
-     * @param  string $string
-     * @param  string $balise
-     * @return array
-     */
-    static function balise_extract(string $string, string $balise): array
+    /** Retrieves a text between a tag */
+    static function getTag($html, $tag)
     {
-        preg_match("/<$balise.*?>(.*)<\/$balise>/", $string, $match);
-        return $match;
+        $start = strpos($html, "<$tag");
+        $endstart = strpos($html, ">", $start);
+        $end = strpos($html, "</$tag", $start);
+        return substr($html, $endstart + 1, $end - $endstart - 1);
     }
+
+
     /**
-     * Retrieves All a text between a tag (EXAMPLE <H1> Text </ H1>
-     *
-     * @param  string $string
-     * @param  string $balise
-     * @return array
+     * It extracts all the occurences of a given HTML tag and returns an array of arrays containing the
+     * tag and its content
+     * 
+     * @param string html the html code
+     * @param string balise the name of the tag you want to extract
+     * 
+     * @return array An array of arrays.
      */
-    static function balise_extract_all($string, $balise): array
+    static function balise_extract_all(string $html, string $balise): array
     {
-        preg_match_all("/<$balise [^>]+>(.*)<\/$balise>/", $string, $match);
-        return $match;
+        $start = 0;
+        $result = [];
+        while (($pos = strpos($html, "<$balise", $start)) !== false) {
+            $tab = [];
+            $endstart = strpos($html, ">", $pos);
+            $end = strpos($html, "</$balise", $pos);
+            $tab[0] = substr($html, $pos, $endstart - $pos + 1);
+            $startnext = strpos($html, "<$balise", $end);
+            $tab[1] = substr($html, $end + strlen($balise) + 3, $startnext !== false ? $startnext - $end - 3 - strlen($balise) : strlen($html) - $end - 3 - strlen($balise));
+            $result[] = $tab;
+            $start = $end;
+        }
+        return $result;
+    }
+
+    /**
+     * It takes a string, a tag, and a starting position, and returns an array containing the first tag
+     * and the text between it and the next tag
+     * 
+     * @param html the HTML code to parse
+     * @param tag the tag you want to extract
+     * @param start the position of the first character of the tag
+     * 
+     * @return array an array with two elements. The first element is the tag and its content, the
+     * second element is the content of the tag.
+     */
+    static function balise_extract($html, $tag, $start = 0): array
+    {
+        $start = strpos($html, "<$tag");
+        $tab = [];
+        if ($start !== false) {
+            $end = strpos($html, "</$tag", $start);
+            $endend = strpos($html, ">", $end);
+            $tab[0] = substr($html, $start, $endend - $start);
+            $startnext = strpos($html, "<$tag", $endend);
+            $tab[1] = substr($html, $endend + 1, $startnext !== false ? $startnext - $endend - 1 : strlen($html) - $endend - 1);
+        }
+        return $tab;
     }
     /**
      * Retrieves a text between a tag (EXAMPLE <H1> Text and end tag </ H1>
@@ -93,6 +163,16 @@ class StringHelper
         preg_match_all("/<$balise [^>]+>(.*)<$end/", $string, $match);
         return $match;
     }
+    /**
+     * If the string starts with the substring, remove the substring from the string
+     * 
+     * @param string The string to be trimmed.
+     * @param substring The substring to remove from the start of the string.
+     * @param trimonsubstring If set to true, the function will trim the substring before comparing it
+     * to the string.
+     * 
+     * @return The string without the substring at the beginning.
+     */
     static function  removeStart($string, $substring, $trimonsubstring = false)
     {
         $substring = $trimonsubstring ? trim($substring) : $substring;
@@ -100,6 +180,16 @@ class StringHelper
             return substr(trim($string), strlen($substring));
         else return $string;
     }
+    /**
+     * It removes the last occurrence of a substring from a string
+     * 
+     * @param string The string to be trimmed
+     * @param substring The substring to remove from the end of the string.
+     * @param trimonsubstring If set to true, the function will trim the  before comparing
+     * it to the end of the .
+     * 
+     * @return The string without the substring at the end.
+     */
     static function  removeEnd($string, $substring, $trimonsubstring = false)
     {
         $substring = $trimonsubstring ? trim($substring) : $substring;
@@ -107,11 +197,32 @@ class StringHelper
             return substr(trim($string), 0, strlen(trim($string)) - strlen($substring));
         else return $string;
     }
+    /**
+     * It removes the first and last occurrence of a substring from a string
+     * 
+     * @param string The string to be modified
+     * @param substring The substring to remove from the start and end of the string.
+     * @param endsubstring The substring to remove from the end of the string. If this is not
+     * specified, it will default to the same value as .
+     * @param trimonsubstring If true, the string will be trimmed on the substring.
+     * 
+     * @return The string with the start and end substrings removed.
+     */
     static function removeStartAndEnd($string, $substring, $endsubstring = '', $trimonsubstring = false)
     {
         $endsubstring = $endsubstring == '' ? $substring : $endsubstring;
         return StringHelper::removeEnd(StringHelper::removeStart($string, $substring, $trimonsubstring), $endsubstring, $trimonsubstring);
     }
+    /**
+     * It takes a string, removes all HTML tags, removes all stop words, removes all words that are
+     * too short, removes all numbers, and then returns an array of the most common words in the
+     * string
+     * 
+     * @param string The string to extract keywords from.
+     * @param number The number of keywords you want to return.
+     * 
+     * @return array An array of keywords
+     */
     static function keywords($string, $number = 10): array
     {
         $string = strip_tags($string);
