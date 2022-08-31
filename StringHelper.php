@@ -5,12 +5,13 @@ namespace App\Service\base;
 class StringHelper
 {
 
-    static function replaceWith($string, $search, $replace, $casse = false)
+    static function addLink($string, $search, $link)
     {
         $start = 0;
-        while ($pos = strpos($casse ? strtolower($string) : $string, $casse ? strtolower($search) : $search, $start) !== false) {
-            $string = substr($string, 0, $pos) . $replace . substr($string, $pos + strlen($search));
-            $start = $pos + strlen($replace);
+        while (($pos = strpos(strtolower($string), strtolower($search), $start)) !== false) {
+            $new = '<a href="' . $link . '">' . substr($string, $pos, strlen($search)) . '</a>';
+            $string = substr($string, 0, $pos) . $new . substr($string, $pos + strlen($search));
+            $start = $pos + strlen($new);
         }
         return $string;
     }
