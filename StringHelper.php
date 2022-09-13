@@ -2,6 +2,10 @@
 
 namespace App\Service\base;
 
+use Symfony\Component\String\Slugger\AsciiSlugger;
+use Symfony\Component\DomCrawler\Crawler;
+use App\Service\base\StringHelper;
+
 class StringHelper
 {
 
@@ -267,5 +271,38 @@ class StringHelper
 	</ul>
 	</div>';
         return $contents;
+    }
+    /**
+     * It takes a HTML string and a directory as parameters, and it downloads all the images from the
+     * HTML string to the directory, and it returns the HTML string with the images' src attributes
+     * updated to point to the downloaded images
+     * 
+     * @param html the html code to parse
+     * @param dir the directory where the images will be saved
+     * 
+     * @return The HTML of the page with the images downloaded and the src attribute changed to the
+     * local path.
+     */
+    static function UrlDistanteToDir($html, $dir, $type = 'img')
+    {
+        $link = $type == 'img' ? 'src' : 'href';
+        $slugger = new AsciiSlugger();
+        $crawler = new Crawler($html);
+        $host = parse_url($_SERVER['HTTP_REFERER'])['host'];
+        foreach ($crawler->filter($type) as $img) {
+            /** @var Node $img */
+            if (isset(parse_url($img->getAttribute($link))['host']) && $host != parse_url($img->getAttribute($link))['host']) {
+                //on télécharge l'image
+                $decompose = explode('/', parse_url($img->getAttribute($link))['path']);
+                @mkdir($dir, 0777, true);
+                $nomFichier = $dir  . "/" . $slugger->slug(end($decompose));
+                if (copy($img->getAttribute($link), $nomFichier) == false) {
+                    return new \Exception("Impossible de télécharger l'image " . $img->getAttribute($link));
+                } else {
+                    $img->setAttribute($link, '/' . $nomFichier);
+                }
+            };
+        }
+        return $crawler->html();
     }
 }
