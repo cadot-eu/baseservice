@@ -61,12 +61,12 @@ class FileUploader
         return $this->targetDirectory;
     }
 
-    private function fileExtension($s)
+    static function fileExtension($s)
     {
         $n = strrpos($s, ".");
         return ($n === false) ? "" : substr($s, $n + 1);
     }
-    private function fileName($s)
+    static function fileName($s)
     {
         $n = strrpos($s, ".");
         return ($n === false) ? $s : substr($s, 0, $n);

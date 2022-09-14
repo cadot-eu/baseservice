@@ -5,6 +5,7 @@ namespace App\Service\base;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\DomCrawler\Crawler;
 use App\Service\base\StringHelper;
+use PhpOffice\PhpSpreadsheet\Shared\StringHelper as SharedStringHelper;
 
 class StringHelper
 {
@@ -272,37 +273,69 @@ class StringHelper
 	</div>';
         return $contents;
     }
+
     /**
-     * It takes a HTML string and a directory as parameters, and it downloads all the images from the
-     * HTML string to the directory, and it returns the HTML string with the images' src attributes
-     * updated to point to the downloaded images
+     * It downloads all the images from a remote URL and saves them to a local directory
      * 
      * @param html the html code to parse
      * @param dir the directory where the images will be saved
      * 
-     * @return The HTML of the page with the images downloaded and the src attribute changed to the
-     * local path.
+     * @return the html of the body of the crawler.
      */
-    static function UrlDistanteToDir($html, $dir, $type = 'img')
+    static function ImgDistanteToDir($html, $dir)
     {
-        $link = $type == 'img' ? 'src' : 'href';
         $slugger = new AsciiSlugger();
         $crawler = new Crawler($html);
-        $host = parse_url($_SERVER['HTTP_REFERER'])['host'];
-        foreach ($crawler->filter($type) as $img) {
+        $host = parse_url($_SERVER['HTTP_HOST'])['host'];
+        foreach ($crawler->filter('img') as $img) {
             /** @var Node $img */
-            if (isset(parse_url($img->getAttribute($link))['host']) && $host != parse_url($img->getAttribute($link))['host']) {
+            if (isset(parse_url($img->getAttribute('src'))['host']) && $host != parse_url($img->getAttribute('src'))['host']) {
                 //on télécharge l'image
-                $decompose = explode('/', parse_url($img->getAttribute($link))['path']);
+                $decompose = explode('/', parse_url($img->getAttribute('src'))['path']);
                 @mkdir($dir, 0777, true);
-                $nomFichier = $dir  . "/" . $slugger->slug(end($decompose));
-                if (copy($img->getAttribute($link), $nomFichier) == false) {
-                    return new \Exception("Impossible de télécharger l'image " . $img->getAttribute($link));
-                } else {
-                    $img->setAttribute($link, '/' . $nomFichier);
+                $nomFichier = str_replace('//', '/', $dir  . "/" . $slugger->slug(end($decompose)));
+
+                $img->setAttribute('src', '/' . $nomFichier);
+            };
+        }
+        if ($crawler->filter('body')->count() > 0) return $crawler->filter('body')->html();
+        else return '';
+    }
+    /**
+     * It downloads all the files from a remote URL and saves them to a local directory
+     * 
+     * @param html the html code to parse
+     * @param dir the directory where the files will be saved
+     * @param extension the file extensions to be downloaded.
+     * 
+     * @return The return value is the HTML of the body tag.
+     */
+    static function FileDistanteToDir($html, $dir, $extension = 'pdf,ico,gif,png,jpg,jpeg,pdf,doc,docx,stl,blend,jpeg,tif,xls,xlsx,zip,rar')
+    {
+        $slugger = new AsciiSlugger();
+        $crawler = new Crawler($html);
+        $host = parse_url($_SERVER['HTTP_HOST'])['host'];
+        foreach ($crawler->filter('img') as $img) {
+            /** @var Node $img */
+            if (isset(parse_url($img->getAttribute('href'))['host']) && $host != parse_url($img->getAttribute('href'))['host']) {
+                //on télécharge le fichier
+                $decompose = explode('/', parse_url($img->getAttribute('href'))['path']);
+                @mkdir($dir, 0777, true);
+                $nomFichier = str_replace('//', '/', $dir  . "/" . $slugger->slug(end($decompose)));
+                $extension = FileUploader::fileExtension(end($decompose));
+                //si c'est une extension à sauvegarder
+                if (in_array($extension, explode(',', $extension))) {
+                    //si la copie a échoué
+                    if (copy($img->getAttribute('href'), $nomFichier) == false) {
+                        return new \Exception("Impossible de télécharger l'image " . $img->getAttribute('href'));
+                    } //sinon on modifie l'attribut href
+                    else {
+                        $img->setAttribute('href', '/' . $nomFichier);
+                    }
                 }
             };
         }
-        return $crawler->html();
+        if ($crawler->filter('body')->count() > 0) return $crawler->filter('body')->html();
+        else return '';
     }
 }
