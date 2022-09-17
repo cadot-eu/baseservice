@@ -9,6 +9,7 @@ use Symfony\Component\HttpFoundation\File\UploadedFile;
 use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class FileUploader
 {
@@ -38,11 +39,11 @@ class FileUploader
         } else {
             $originalFilename = $file->getFilename();
         }
-        $filename = $this->encoderFilename($originalFilename);
+        $fileName = FileUploader::encodeFilename($originalFilename);
         try {
             $sdir = $this->slugger->slug($dir);
             $destDir = "/app/public/uploads/" . $sdir;
-            @mkdir($destDir, 0777, true);
+            @mkdir($destDir, 0666, true);
             $file->move($destDir, $fileName);
         } catch (FileException $e) {
             $this->logger->error('failed to upload image: ' . $e->getMessage());
@@ -51,22 +52,19 @@ class FileUploader
 
         return $destDir = "uploads/" . $sdir . '/' . $fileName;
     }
-
     /* A function that is used to encode the filename. */
     static function encodeFilename($originalFilename)
     {
-        //majsucule minuscule, accents conservés et ' remplacé par _ et les autres remplacé par - idem pour _
-        $safeFilename = $this->slugger->slug(str_replace([' ', '_', '.', "'", '-'], ['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], $this->fileName($originalFilename)));
-        $extension = $this->fileExtension($originalFilename);
-        return $safeFilename . '-' . uniqid() . '.' . $extension;
+        return rawurlencode(FileUploader::fileName($originalFilename)) . '-' . uniqid() . '.' . FileUploader::fileExtension($originalFilename);
     }
-    /* A function that is used to encode the filename. */
+    /* A function that is used to decode the filename. */
     static function decodeFilename($encodeFilename, $removeUniqid = true)
     {
-        $decodeFilename = str_replace(['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], [' ', '_', '.', "'", '-'], $encodeFilename);
-        return $encodeFilename;
-        $extension = $this->fileExtension($originalFilename);
-        return $safeFilename . '-' . uniqid() . '.' . $extension;
+        if ($removeUniqid)
+            $firstPart = explode('-', $encodeFilename)[0];
+        else
+            $firstPart = $encodeFilename;
+        return rawurldecode(FileUploader::fileName($firstPart)) . '.' . FileUploader::fileExtension($encodeFilename);
     }
     public function getTargetDirectory()
     {
