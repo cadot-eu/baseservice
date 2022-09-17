@@ -38,11 +38,7 @@ class FileUploader
         } else {
             $originalFilename = $file->getFilename();
         }
-        //majsucule minuscule, accents conservés et ' remplacé par _ et les autres remplacé par - idem pour _
-
-        $safeFilename = $this->slugger->slug(str_replace([' ', '_', '.', "'", '-'], ['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], $this->fileName($originalFilename)));
-        $extension = $this->fileExtension($originalFilename);
-        $fileName = $safeFilename . '.' . uniqid() . '.' . $extension;
+        $filename = $this->encoderFilename($originalFilename);
         try {
             $sdir = $this->slugger->slug($dir);
             $destDir = "/app/public/uploads/" . $sdir;
@@ -56,6 +52,22 @@ class FileUploader
         return $destDir = "uploads/" . $sdir . '/' . $fileName;
     }
 
+    /* A function that is used to encode the filename. */
+    static function encodeFilename($originalFilename)
+    {
+        //majsucule minuscule, accents conservés et ' remplacé par _ et les autres remplacé par - idem pour _
+        $safeFilename = $this->slugger->slug(str_replace([' ', '_', '.', "'", '-'], ['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], $this->fileName($originalFilename)));
+        $extension = $this->fileExtension($originalFilename);
+        return $safeFilename . '-' . uniqid() . '.' . $extension;
+    }
+    /* A function that is used to encode the filename. */
+    static function decodeFilename($encodeFilename, $removeUniqid = true)
+    {
+        $decodeFilename = str_replace(['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], [' ', '_', '.', "'", '-'], $encodeFilename);
+        return $encodeFilename;
+        $extension = $this->fileExtension($originalFilename);
+        return $safeFilename . '-' . uniqid() . '.' . $extension;
+    }
     public function getTargetDirectory()
     {
         return $this->targetDirectory;
