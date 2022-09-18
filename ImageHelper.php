@@ -6,89 +6,45 @@ use App\Repository\ParametresRepository;
 use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
+use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\String\Slugger\AsciiSlugger;
 
-class ToolsHelper
+class ImageHelper
 {
-    /**
-     * Get the list of enabled locales from the translation.yaml file
-     *
-     * @return An array of enabled locales.
-     */
-    public static function get_langs()
+    static function renommerImageByField(EntityManagerInterface $em, array $entities, string $champ)
     {
-        $yaml = new Yaml();
-        if (file_exists('/app/config/packages/translation.yaml')) {
-            $trans = $yaml->parseFile('/app/config/packages/translation.yaml')['framework'];
-            if (isset($trans['enabled_locales'])) {
-                return $trans['enabled_locales'];
-            } else {
-                return null;
+        $erreurs = [];
+        foreach ($entities as $entity => $fields) { //boucle sur les entitées
+            $datas = $em->getRepository('App\Entity\\' . ucfirst($entity))->findAll();
+            foreach ($datas as $data) { //boucle sur les données des entitées
+                foreach (explode(',', $fields) as $field) { //boucle sur les champs des données des entitées
+                    $parser = new ParserDocblock($entity);
+                    $getField = 'get' . ucfirst($field);
+                    $setField = 'set' . ucfirst($field);
+                    $getChamp = 'get' . ucfirst($champ);
+                    $id = $data->getId();
+                    if ($parser->getType($field) == 'text') { //pour un texte on recherche les images
+                        $c = new Crawler($data->$getField());
+                        $return = array_filter($c->filter('img')->each(function ($node, $i) use ($entity, $id, $setField, $getField, $data, $getChamp) { //boucle sur les images des champs des données des entitées
+                            $newnom = "/uploads/$entity/" . FileUploader::encodeFilename($data->$getChamp() . '_' . $i . '.' . FileUploader::FileExtension($node->attr('src')));
+                            if (file_exists('/app/public' . $node->attr('src')) && $node->attr('src')  &&  FileUploader::decodeFilename($newnom) !=  FileUploader::decodeFilename($node->attr('src'))) {
+                                if (rename('/app/public' . $node->attr('src'), '/app/public' . $newnom)) {
+                                    $data->$setField(str_replace($node->attr('src'), $newnom, $data->$getField()));
+                                }
+                            }
+                        }));
+                    } else {
+                        if (file_exists('/app/public' . $data->$getField()) && $data->$getField()) {
+                            $newnom = "/uploads/$entity-pin/" . FileUploader::encodeFilename($data->$getChamp() . '.' . FileUploader::FileExtension($data->$getField()));
+                            if (rename('/app/public'  . $data->$getField(), '/app/public' . $newnom)) {
+                                $data->$setField($newnom);
+                            }
+                        }
+                    }
+                }
+                $em->persist($data);
+                $em->flush();
             }
-        } else {
-            return null;
         }
-    }
-
-    /**
-     * This function will return a random article from Wikipedia
-     *
-     * @return the content of the page.
-     */
-    public static function wikipedia_article_random()
-    {
-        if (!function_exists('curl_init')) {
-            return false;
-        }
-        $url = 'https://en.wikipedia.org/api/rest_v1/page/random/html';
-        $options = [
-            CURLOPT_RETURNTRANSFER => true,
-            // return web page
-            CURLOPT_HEADER => false,
-            // don't return headers
-            CURLOPT_FOLLOWLOCATION => true,
-            // follow redirects
-            CURLOPT_ENCODING => "",
-            // handle all encodings
-            CURLOPT_USERAGENT => "spider",
-            // who am i
-            CURLOPT_AUTOREFERER => true,
-            // set referer on redirect
-            CURLOPT_CONNECTTIMEOUT => 30,
-            // timeout on connect
-            CURLOPT_TIMEOUT => 30,
-            // timeout on response
-            CURLOPT_MAXREDIRS => 3,
-            // stop after 10 redirects
-        ];
-
-        $ch = curl_init($url);
-        curl_setopt_array($ch, $options);
-        $content = curl_exec($ch);
-        $err = curl_errno($ch);
-        $errmsg = curl_error($ch);
-        $header = curl_getinfo($ch);
-        curl_close($ch);
-        return $content;
-        if (preg_match('/<title>(.*?)<\/title>/i', $content, $matches)) {
-            $title = str_replace(' - Wikipedia, the free encyclopedia', '', $matches[1]);
-        }
-
-        return '<a href="' . $header['url'] . '">' . $title . '</a>';
-    }
-
-    /**
-     * It returns an array of all the parameters in the database
-     *
-     * @param EntityManagerInterface em The entity manager
-     *
-     * @return An array of all the parameters in the database.
-     */
-    public static function params(EntityManagerInterface $em)
-    {
-        $tab = [];
-        foreach ($em->getRepository('App:Parametres')->findAll() as $parametre) {
-            $tab[AllExtension::ckclean($parametre->getSlug())] = AllExtension::ckclean($parametre->getValeur());
-        }
-        return $tab;
     }
 }

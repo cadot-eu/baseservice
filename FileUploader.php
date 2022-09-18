@@ -10,6 +10,10 @@ use Symfony\Component\String\Slugger\SluggerInterface;
 use Symfony\Component\HttpFoundation\File\File;
 use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\String\Slugger\AsciiSlugger;
+use Gedmo\Sluggable\Util\Urlizer;
+use Liip\ImagineBundle\Service\FilterService;
+use Monolog\Logger;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class FileUploader
 {
@@ -18,54 +22,45 @@ class FileUploader
     private $logger;
 
     protected $parameterBag;
+    private $filterService;
 
-    public function __construct(SluggerInterface $slugger, LoggerInterface $logger, ParameterBagInterface $parameterBag)
+    public function __construct(FilterService $filterService, SluggerInterface $slugger, LoggerInterface $logger, ParameterBagInterface $parameterBag)
     {
+        $this->filterService = $filterService;
         $this->slugger = $slugger;
         $this->logger = $logger;
         $this->parameterBag = $parameterBag;
     }
 
-    public function upload(File $file, $dir = '', $copy_no_move = false)
+    public function upload(UploadedFile $file, $dir = '', $filter = null)
     {
-        if ($copy_no_move) {
-            $fs = new Filesystem();
-            $targetPath = sys_get_temp_dir() . '/' . uniqid();
-            $fs->copy($file, $targetPath, true);
-            $file = new File($targetPath);
-        }
-        if ($file instanceof UploadedFile) {
-            $originalFilename = $file->getClientOriginalName();
-        } else {
-            $originalFilename = $file->getFilename();
-        }
-        $fileName = FileUploader::encodeFilename($originalFilename);
+
+        $fileName = FileUploader::encodeFilename($file->getClientOriginalName());
         try {
             $sdir = $this->slugger->slug($dir);
             $destDir = "/app/public/uploads/" . $sdir;
-            @mkdir($destDir, 0666, true);
-            $file->move($destDir, $fileName);
+            @mkdir($destDir, 0777, true);
+            $destfile = $file->move($destDir, $fileName);
         } catch (FileException $e) {
             $this->logger->error('failed to upload image: ' . $e->getMessage());
             throw new FileException('Failed to upload file' . $e->getMessage());
         }
-
+        if ($filter) {
+            rename('/app/public/' . parse_url($this->filterService->getUrlOfFilteredImage(substr($destfile->getPathName(), strlen('/app/public/')), $filter))['path'], $destfile->getPathName());
+        }
         return $destDir = "uploads/" . $sdir . '/' . $fileName;
     }
     /* A function that is used to encode the filename. */
     static function encodeFilename($originalFilename)
     {
-        return rawurlencode(FileUploader::fileName($originalFilename)) . '-' . uniqid() . '.' . FileUploader::fileExtension($originalFilename);
+        return Urlizer::urlize(FileUploader::fileName($originalFilename)) . '_' . uniqid() . '.' . FileUploader::fileExtension($originalFilename);
     }
     /* A function that is used to decode the filename. */
-    static function decodeFilename($encodeFilename, $removeUniqid = true)
+    static function decodeFilename($encodeFilename)
     {
-        if ($removeUniqid)
-            $firstPart = explode('-', $encodeFilename)[0];
-        else
-            $firstPart = $encodeFilename;
-        return rawurldecode(FileUploader::fileName($firstPart)) . '.' . FileUploader::fileExtension($encodeFilename);
+        return explode('_', $encodeFilename)[0] . '.' . FileUploader::fileExtension($encodeFilename);
     }
+
     public function getTargetDirectory()
     {
         return $this->targetDirectory;
@@ -74,7 +69,7 @@ class FileUploader
     static function fileExtension($s)
     {
         $n = strrpos($s, ".");
-        return ($n === false) ? "" : substr($s, $n + 1);
+        return ($n === false) ? "" : strtolower(substr($s, $n + 1));
     }
     static function fileName($s)
     {
@@ -83,9 +78,10 @@ class FileUploader
     }
     static function cleanname($string)
     {
+        return $string;
         $info = pathinfo($string);
         $point = strrpos($info['filename'], ".");
         $filename = substr($info['filename'], 0, $point);
-        return str_replace(['ZYSPACEYZ', 'ZYUNDERSCOREYZ', 'ZYPOINTYZ', 'ZYAPOSTROPHEYZ', 'ZYTIRETYZ'], [' ', '_', '.', "'", '-'],  $filename . '.' . $info['extension']);
+        return $string; // . '.' . $info['extension'];
     }
 }
