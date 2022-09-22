@@ -68,16 +68,32 @@ class StringHelper
      * 
      * @return the string between the start and end strings.
      */
-    static function extract($str, $pos, $start, $end = '')
+    static function extract($str, $pos, $start, $end = null): string|bool
     {
-        if ($end == '') $end = $start;
+        if ($end == null) $end = $start;
         $sub = strpos($str, $start, $pos); //on cherche la position du départ dans la chaine
+        if ($sub === false) return false; //pas de départ trouvé
         $sub += strlen($start); //on ajoute la longueur de la chaine départ
+        if (strpos($str, $end, $pos) === false) return false; //pas de fin trouvé
         $size = strpos($str, $end, $sub) - $sub; //on calcule la taille de la chaine-le départ
         return substr($str, $sub, $size); //on retourne la chaine
     }
-
-
+    static function extractAll($str, int $pos, string $start, string|bool $end = null): array
+    {
+        $result = [];
+        while (($find = strpos($str, $start, $pos) !== false)) {
+            if ($end == null) $end = $start;
+            $sub = strpos($str, $start, $pos); //on cherche la position du départ dans la chaine
+            if ($sub === false) return false; //pas de départ trouvé
+            $sub += strlen($start); //on ajoute la longueur de la chaine départ
+            if (strpos($str, $end, $pos) === false) return false; //pas de fin trouvé
+            $posend = strpos($str, $end, $sub);
+            $pos = $posend + strlen($end);
+            $size = $posend - $sub; //on calcule la taille de la chaine-le départ
+            $result[] = substr($str, $sub, $size); //on retourne la chaine
+        }
+        return $result;
+    }
     /**
      * It inserts a string into another string at a specified position
      * 
