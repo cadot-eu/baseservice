@@ -35,7 +35,10 @@ class FileUploader
     public function upload(UploadedFile $file, $dir = '', $filter = null)
     {
 
-        $fileName = FileUploader::encodeFilename($file->getClientOriginalName());
+        if ($filter != null) {
+            $fileName = FileUploader::encodeFilename(FileUploader::fileName($file->getClientOriginalName()) . "_$filter" . "." . FileUploader::fileExtension($file->getClientOriginalName()));
+        } else
+            $fileName = FileUploader::encodeFilename($file->getClientOriginalName());
         try {
             $sdir = $this->slugger->slug($dir);
             $destDir = "/app/public/uploads/" . $sdir;
@@ -48,7 +51,10 @@ class FileUploader
         if ($filter) {
             rename('/app/public/' . parse_url($this->filterService->getUrlOfFilteredImage(substr($destfile->getPathName(), strlen('/app/public/')), $filter))['path'], $destfile->getPathName());
         }
-        return $destDir = "uploads/" . $sdir . '/' . $fileName;
+        if (file_exists($destfile->getPathName())) {
+            return $destDir = "uploads/" . $sdir . '/' . $fileName;
+        }
+        return null;
     }
     /* A function that is used to encode the filename. */
     static function encodeFilename($originalFilename)
