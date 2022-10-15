@@ -32,7 +32,7 @@ class FileUploader
         $this->parameterBag = $parameterBag;
     }
 
-    public function upload(UploadedFile $file, $dir = '', $filter = null)
+    public function upload(UploadedFile $file, $dir = '', $filter = null): ?string
     {
 
         if ($filter != null) {
