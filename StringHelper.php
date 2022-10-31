@@ -4,7 +4,6 @@ namespace App\Service\base;
 
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Symfony\Component\DomCrawler\Crawler;
-use App\Service\base\StringHelper;
 use PhpOffice\PhpSpreadsheet\Shared\StringHelper as SharedStringHelper;
 
 class StringHelper
