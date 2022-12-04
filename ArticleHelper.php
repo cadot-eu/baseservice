@@ -49,7 +49,8 @@ class ArticleHelper
             foreach ($mots as $mot) {
                 $terme = $mot->getTerme();
                 $title = $mot->getDefinition();
-                $text = preg_replace('/\b' . preg_quote($terme, "/") . '\b/i', "<span  class=\"glossaire\" glossaire=\"$title\">\$0</span>", $text, 1);
+                $text = preg_replace('/\b' .
+                    preg_quote($terme, "/") . '\b/i', "<span  class=\"glossaire\" glossaire=\"$title\">\$0</span>", $text, 1);
             }
             $article = str_replace($p->outerHtml(), $text, $article);
         }
