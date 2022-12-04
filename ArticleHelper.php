@@ -3,6 +3,7 @@
 namespace App\Service\base;
 
 use App\Repository\GlossaireRepository;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 use Symfony\Component\DomCrawler\Crawler;
@@ -53,5 +54,40 @@ class ArticleHelper
             $article = str_replace($p->outerHtml(), $text, $article);
         }
         return $article;
+    }
+
+    static function addFilterLiip($texte, CacheManager $imagineCacheManager)
+    {
+        //on ajoute un filtre en fonction du champ style width
+        $crawler = new Crawler($texte);
+        //on vire les figures
+        foreach ($crawler->filter('figure') as $node) {
+            //@var node $node
+            $child = $node->getElementsByTagName('img');
+            $child[0]->setAttribute('style', $node->getAttribute('style') . ' ' . $child[0]->getAttribute('style'));
+            $child[0]->setAttribute('class', $node->getAttribute('class') . ' ' . $child[0]->getAttribute('class'));
+            $node->removeAttribute('style');
+            $node->removeAttribute('class');
+        }
+        //on vérifie aussi les img
+        foreach ($crawler->filter('img') as $node) {
+            $src = $node->getAttribute('src');
+            foreach (explode(' ', $node->getAttribute('style')) as $style) {
+                if (strpos($style, 'width') !== false) {
+                    $width = explode(':', $style)[1];
+                    $liip = str_replace([';', '%', '0', '1', '2', '3', '4', '5', '6', '7', '8', '9', '.'], '', $width);
+                    $img = 'uploads/' . (explode('uploads/', $src)[1]);
+                    if ($liip) {
+                        dump('width:' . $width);
+                        $node->setAttribute('style', str_replace('width:' . $width, '', $node->getAttribute('style')));
+                        $resolvedPath = $imagineCacheManager->getBrowserPath($img, $liip);
+                        $node->setAttribute('src', $resolvedPath);
+                        //dump($resolvedPath);
+                    }
+                    //dump($resolvedPath);
+                }
+            }
+        }
+        return $crawler->html();
     }
 }
