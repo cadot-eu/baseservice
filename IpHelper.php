@@ -5,7 +5,7 @@ namespace App\Service\base;
 
 class IpHelper
 {
-    static function getUserIP()
+    static public function getUserIP()
     {
 
         if (isset($_SERVER['HTTP_CLIENT_IP'])) {

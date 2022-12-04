@@ -9,7 +9,7 @@ use Symfony\Component\Yaml\Yaml;
 
 class FileHelper
 {
-    static function deleteDirectory_notempty($dir)
+    static public function deleteDirectory_notempty($dir)
     {
         if (is_dir($dir)) {
             $objects = scandir($dir);

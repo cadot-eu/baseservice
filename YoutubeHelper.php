@@ -7,7 +7,7 @@ namespace App\Service\base;
 class YoutubeHelper
 {
   /* A function that takes a url of youtube and returns a embed youtube url. */
-  static function adaptUrl($url)
+  static public function adaptUrl($url)
   {
     $html = <<<'EOT'
         <div class="ratio ratio-16x9">

@@ -85,7 +85,7 @@ class TestHelper
      * 
      * @return True or False
      */
-    static function strInArray($string, $arrayOfSubstring)
+    static public function strInArray($string, $arrayOfSubstring)
     {
         foreach ($arrayOfSubstring as $sub) {
             if (strpos($string, $sub) !== false) {
@@ -101,7 +101,7 @@ class TestHelper
      * 
      * @return Array of src don't exist in the hd
      */
-    static function verifImageExiste(EntityManagerInterface $em, array $entities): array
+    static public function verifImageExiste(EntityManagerInterface $em, array $entities): array
     {
         $nontrouve = [];
         foreach ($entities as $entity => $fields) { //boucle sur les entitées

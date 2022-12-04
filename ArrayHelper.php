@@ -13,7 +13,7 @@ class ArrayHelper
      * @param  array  $array
      * @return bool
      */
-    public static function isAssoc(array $array)
+    static public function isAssoc(array $array)
     {
         $keys = array_keys($array);
 
@@ -26,7 +26,7 @@ class ArrayHelper
      * @param a The index of the element to move.
      * @param b The index of the element to move.
      */
-    public static function moveElement($array, $a, $b)
+    static public function moveElement($array, $a, $b)
     {
         $out = array_splice($array, $a, 1);
         array_splice($array, $b, 0, $out);

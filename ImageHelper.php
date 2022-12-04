@@ -11,7 +11,7 @@ use Symfony\Component\String\Slugger\AsciiSlugger;
 
 class ImageHelper
 {
-    static function renommerImageByField(EntityManagerInterface $em, array $entities, string $champ)
+    static public function renommerImageByField(EntityManagerInterface $em, array $entities, string $champ)
     {
         $erreurs = [];
         foreach ($entities as $entity => $fields) { //boucle sur les entitées

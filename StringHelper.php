@@ -9,7 +9,7 @@ use PhpOffice\PhpSpreadsheet\Shared\StringHelper as SharedStringHelper;
 class StringHelper
 {
 
-    static function addLink($string, $search, $link)
+    static public function addLink($string, $search, $link)
     {
         $start = 0;
         while (($pos = strpos(strtolower($string), strtolower($search), $start)) !== false) {
@@ -29,7 +29,7 @@ class StringHelper
      * 
      * @return string a string.
      */
-    static function chaine_extract($string, $stringdeb, $stringfin): string
+    static public function chaine_extract($string, $stringdeb, $stringfin): string
     {
         $deb = strpos($string, $stringdeb);
         if ($deb === false) return '';
@@ -50,7 +50,7 @@ class StringHelper
      * 
      * @return string the string with the replaced text.
      */
-    static function chaine_remplace(string $html, string $debs, string $fins, string $chaine, int $start = 0, bool $casse = false): string
+    static public function chaine_remplace(string $html, string $debs, string $fins, string $chaine, int $start = 0, bool $casse = false): string
     {
         $pos = strpos($casse ? strtolower($html) : $html, $casse ? strtolower($debs) : $debs, $start);
         $fin = strpos($casse ? strtolower($html) : $html, $casse ? strtolower($fins) : $fins, $pos + 1);
@@ -67,7 +67,7 @@ class StringHelper
      * 
      * @return the string between the start and end strings.
      */
-    static function extract($str, $pos, $start, $end = null): string|bool
+    static public function extract($str, $pos, $start, $end = null): string|bool
     {
         if ($end == null) $end = $start;
         $sub = strpos($str, $start, $pos); //on cherche la position du départ dans la chaine
@@ -77,7 +77,7 @@ class StringHelper
         $size = strpos($str, $end, $sub) - $sub; //on calcule la taille de la chaine-le départ
         return substr($str, $sub, $size); //on retourne la chaine
     }
-    static function extractAll($str, int $pos, string $start, string|bool $end = null): array
+    static public function extractAll($str, int $pos, string $start, string|bool $end = null): array
     {
         $result = [];
         while (($find = strpos($str, $start, $pos) !== false)) {
@@ -103,7 +103,7 @@ class StringHelper
      * 
      * @return The string with the inserted string.
      */
-    static function insert($chaine, $strdeb, $insert, $after = true)
+    static public function insert($chaine, $strdeb, $insert, $after = true)
     {
         if ($after) $pos = strpos((string)$chaine, $strdeb) + strlen($strdeb);
         else $pos = strpos((string)$chaine, $strdeb);
@@ -112,7 +112,7 @@ class StringHelper
 
 
     /** Retrieves a text between a tag */
-    static function getTag($html, $tag)
+    static public function getTag($html, $tag)
     {
         $start = strpos($html, "<$tag");
         $endstart = strpos($html, ">", $start);
@@ -130,7 +130,7 @@ class StringHelper
      * 
      * @return array An array of arrays.
      */
-    static function balise_extract_all(string $html, string $balise): array
+    static public function balise_extract_all(string $html, string $balise): array
     {
         $start = 0;
         $result = [];
@@ -158,7 +158,7 @@ class StringHelper
      * @return array an array with two elements. The first element is the tag and its content, the
      * second element is the content of the tag.
      */
-    static function balise_extract($html, $tag, $start = 0): array
+    static public function balise_extract($html, $tag, $start = 0): array
     {
         $start = strpos($html, "<$tag");
         $tab = [];
@@ -179,7 +179,7 @@ class StringHelper
      * @param  string $end
      * @return array
      */
-    static function balise_extract_begin_end($string, $balise, $end): array
+    static public function balise_extract_begin_end($string, $balise, $end): array
     {
         preg_match_all("/<$balise [^>]+>(.*)<$end/", $string, $match);
         return $match;
@@ -194,7 +194,7 @@ class StringHelper
      * 
      * @return The string without the substring at the beginning.
      */
-    static function  removeStart($string, $substring, $trimonsubstring = false)
+    static public function  removeStart($string, $substring, $trimonsubstring = false)
     {
         $substring = $trimonsubstring ? trim($substring) : $substring;
         if (substr(trim($string), 0, strlen($substring)) == $substring)
@@ -211,7 +211,7 @@ class StringHelper
      * 
      * @return The string without the substring at the end.
      */
-    static function  removeEnd($string, $substring, $trimonsubstring = false)
+    static public function  removeEnd($string, $substring, $trimonsubstring = false)
     {
         $substring = $trimonsubstring ? trim($substring) : $substring;
         if (substr(trim($string), -strlen($substring) - 1) == $substring)
@@ -229,7 +229,7 @@ class StringHelper
      * 
      * @return The string with the start and end substrings removed.
      */
-    static function removeStartAndEnd($string, $substring, $endsubstring = '', $trimonsubstring = false)
+    static public function removeStartAndEnd($string, $substring, $endsubstring = '', $trimonsubstring = false)
     {
         $endsubstring = $endsubstring == '' ? $substring : $endsubstring;
         return StringHelper::removeEnd(StringHelper::removeStart($string, $substring, $trimonsubstring), $endsubstring, $trimonsubstring);
@@ -244,7 +244,7 @@ class StringHelper
      * 
      * @return array An array of keywords
      */
-    static function keywords($string, $number = 10): array
+    static public function keywords($string, $number = 10): array
     {
         $string = strip_tags($string);
         $stopwords = array();
@@ -276,7 +276,7 @@ class StringHelper
      * 
      * @return the html of the body of the crawler.
      */
-    static function ImgDistanteToDir($html, $dir)
+    static public function ImgDistanteToDir($html, $dir)
     {
         $slugger = new AsciiSlugger();
         $crawler = new Crawler($html);
@@ -304,7 +304,7 @@ class StringHelper
      * 
      * @return The return value is the HTML of the body tag.
      */
-    static function FileDistanteToDir($html, $dir, $extension = 'pdf,ico,gif,png,jpg,jpeg,pdf,doc,docx,stl,blend,jpeg,tif,xls,xlsx,zip,rar')
+    static public function FileDistanteToDir($html, $dir, $extension = 'pdf,ico,gif,png,jpg,jpeg,pdf,doc,docx,stl,blend,jpeg,tif,xls,xlsx,zip,rar')
     {
         $slugger = new AsciiSlugger();
         $crawler = new Crawler($html);

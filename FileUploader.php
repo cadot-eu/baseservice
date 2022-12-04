@@ -57,12 +57,12 @@ class FileUploader
         return null;
     }
     /* A function that is used to encode the filename. */
-    static function encodeFilename($originalFilename)
+    static public function encodeFilename($originalFilename)
     {
         return Urlizer::urlize(FileUploader::fileName($originalFilename)) . '_' . uniqid() . '.' . FileUploader::fileExtension($originalFilename);
     }
     /* A function that is used to decode the filename. */
-    static function decodeFilename($encodeFilename)
+    static public function decodeFilename($encodeFilename)
     {
         return explode('_', $encodeFilename)[0] . '.' . FileUploader::fileExtension($encodeFilename);
     }
@@ -72,17 +72,17 @@ class FileUploader
         return $this->targetDirectory;
     }
 
-    static function fileExtension($s)
+    static public function fileExtension($s)
     {
         $n = strrpos($s, ".");
         return ($n === false) ? "" : strtolower(substr($s, $n + 1));
     }
-    static function fileName($s)
+    static public function fileName($s)
     {
         $n = strrpos($s, ".");
         return ($n === false) ? $s : substr($s, 0, $n);
     }
-    static function cleanname($string)
+    static public function cleanname($string)
     {
         //return $string;
         $info = pathinfo($string);

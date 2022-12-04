@@ -14,7 +14,7 @@ class ToolsHelper
      *
      * @return An array of enabled locales.
      */
-    public static function get_langs()
+    static public function get_langs()
     {
         $yaml = new Yaml();
         if (file_exists('/app/config/packages/translation.yaml')) {
@@ -34,7 +34,7 @@ class ToolsHelper
      *
      * @return the content of the page.
      */
-    public static function wikipedia_article_random()
+    static public function wikipedia_article_random()
     {
         if (!function_exists('curl_init')) {
             return false;
@@ -83,7 +83,7 @@ class ToolsHelper
      *
      * @return An array of all the parameters in the database.
      */
-    public static function params(EntityManagerInterface $em)
+    static public function params(EntityManagerInterface $em)
     {
         $tab = [];
         foreach ($em->getRepository(Parametres::class)->findAll() as $parametre) {

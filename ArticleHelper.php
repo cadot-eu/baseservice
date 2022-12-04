@@ -12,7 +12,7 @@ use Symfony\Component\DomCrawler\Crawler;
 class ArticleHelper
 {
     /* Adding a table of contents to the article. */
-    static function addSommaire($article, $top = 1, $deep = 2)
+    static public function addSommaire($article, $top = 1, $deep = 2)
     {
 
         $markupFixer  = new MarkupFixer();
@@ -24,7 +24,7 @@ class ArticleHelper
     }
 
     /* Replacing the oembed tag with the youtube video. */
-    static function addLinkVideos($article)
+    static public function addLinkVideos($article)
     {
         $crawler = new Crawler($article);
         $videos = $crawler->filter('oembed');
@@ -37,7 +37,7 @@ class ArticleHelper
     }
 
     /* Replacing the word "glossaire" with a span tag. */
-    static function addLinkGlossaire($article, GlossaireRepository $glossaireRepository)
+    static public function addLinkGlossaire($article, GlossaireRepository $glossaireRepository)
     {
         $article = str_replace('&nbsp;', '', $article);
         $mots = $glossaireRepository->findBy(['deletedAt' => null, 'etat' => 'en ligne']);
@@ -56,7 +56,7 @@ class ArticleHelper
         return $article;
     }
 
-    static function addFilterLiip($texte, CacheManager $imagineCacheManager)
+    static public function addFilterLiip($texte, CacheManager $imagineCacheManager)
     {
         //on ajoute un filtre en fonction du champ style width
         $crawler = new Crawler($texte);

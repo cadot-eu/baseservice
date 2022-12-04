@@ -9,7 +9,7 @@ class FixtureHelper
 {
 
 
-    public static function generate(string $champ, $lang = 'fr_FR')
+    static public function generate(string $champ, $lang = 'fr_FR')
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
@@ -53,7 +53,7 @@ class FixtureHelper
      * @param nombre_a_creer An array of the number of blocks to create for each template.
      * @param valeurs An array of values to be inserted.
      */
-    public static function add_valeurs($temppage, $template, $nombre_a_creer = [], $valeurs = [])
+    static public function add_valeurs($temppage, $template, $nombre_a_creer = [], $valeurs = [])
     {
         $numvaleurs = 0;
         /* ------------------- pour utiliser les images de picsum ------------------- */
@@ -98,7 +98,7 @@ class FixtureHelper
      *
      * @return The factory returns an instance of the class it was called on.
      */
-    public static function createpage(string $nompage, array $templates, array $maxi = [6], bool $article = false, Temppage $parent = null)
+    static public function createpage(string $nompage, array $templates, array $maxi = [6], bool $article = false, Temppage $parent = null)
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create();
