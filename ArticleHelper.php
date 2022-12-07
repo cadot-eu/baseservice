@@ -13,6 +13,7 @@ class ArticleHelper
 	/* Adding a table of contents to the article. */
 	public static function addSommaire($article, $top = 1, $deep = 2)
 	{
+		if ($article == null) return $article;
 		$markupFixer = new MarkupFixer();
 		$tocGenerator = new TocGenerator();
 		// This ensures that all header tags have `id` attributes so they can be used as anchor links
@@ -55,7 +56,7 @@ class ArticleHelper
 		$ps = $crawler->filter('p');
 		foreach ($ps as $p) {
 			$p = new Crawler($p);
-			$text = $p->html();
+			$text = $p->outerHtml();
 			foreach ($mots as $mot) {
 				$terme = $mot->getTerme();
 				$title = $mot->getDefinition();
