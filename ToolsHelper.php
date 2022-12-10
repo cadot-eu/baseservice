@@ -8,6 +8,7 @@ use Symfony\Component\Yaml\Yaml;
 use App\Entity\base\Parametres;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
+use ReflectionClass;
 
 class ToolsHelper
 {
@@ -103,5 +104,24 @@ class ToolsHelper
             throw new ProcessFailedException($process);
         }
         return '{' . substr($process->getOutput(), 0, -1) . '}'; //on retire la dernière virgule
+    }
+    static public function knpChampsRecherche($entity)
+    {
+        $objetEntity = 'App\Entity\\' . ucfirst($entity);
+        $reflexion = new ReflectionClass(new $objetEntity);
+        if ($reflexion->hasProperty('ordre')) {
+            $ordre = 'a.ordre';
+        } else {
+            $ordre = 'a.vues';
+        }
+        $champs = [];
+        foreach ($reflexion->getProperties() as $propertie) {
+            if (
+                in_array($propertie->getName(), ['titre', 'description', 'texte', 'article', 'name', 'reponse', 'nom', 'explication',])
+            ) {
+                $champs[] = $propertie->getName();
+            }
+        }
+        return implode(',', $champs);
     }
 }
