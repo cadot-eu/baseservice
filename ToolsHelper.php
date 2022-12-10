@@ -6,6 +6,8 @@ use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
 use App\Entity\base\Parametres;
+use Symfony\Component\Process\Process;
+use Symfony\Component\Process\Exception\ProcessFailedException;
 
 class ToolsHelper
 {
@@ -90,5 +92,16 @@ class ToolsHelper
             $tab[AllExtension::ckclean($parametre->getSlug())] = AllExtension::ckclean($parametre->getValeur());
         }
         return $tab;
+    }
+    static public function get_git_log()
+    {
+        $process = new Process(['git', 'log', '--pretty=format:"%h":{  "subject": "%s",%n  "date": "%aD"%n },', '--no-merges', '--reverse', '--no-color', '--no-patch', '--abbrev-commit', '--abbrev=7', '--date=short', '--decorate=full', '--all', '--']);
+        $process->run();
+        //--pretty=format:'"%h":{  "subject": "%s",%n  "date": "%aD"%n },'
+        // executes after the command finishes
+        if (!$process->isSuccessful()) {
+            throw new ProcessFailedException($process);
+        }
+        return '{' . substr($process->getOutput(), 0, -1) . '}'; //on retire la dernière virgule
     }
 }
