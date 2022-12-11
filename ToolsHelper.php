@@ -5,7 +5,7 @@ namespace App\Service\base;
 use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
-use App\Entity\base\Parametres;
+use App\Entity\Parametres;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use ReflectionClass;
