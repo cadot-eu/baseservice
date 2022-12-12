@@ -9,6 +9,8 @@ use App\Entity\Parametres;
 use Symfony\Component\Process\Process;
 use Symfony\Component\Process\Exception\ProcessFailedException;
 use ReflectionClass;
+use Symfony\Component\String\Slugger\AsciiSlugger;
+use Doctrine\Common\Collections\Criteria;
 
 class ToolsHelper
 {
@@ -123,5 +125,65 @@ class ToolsHelper
             }
         }
         return implode(',', $champs);
+    }
+    static public function setSlug(EntityManagerInterface $em,  $entity)
+    {
+        //$this->logActivity('persist', $args);
+        //$class = get_class($args->getObject());
+        //$class = 'App\Entity\\' . \ucfirst($entitystr);
+        $reflexion = new \ReflectionClass(get_class($entity));
+        //on vérifie si un slug est donné dans id
+        $propertieSlug = $reflexion->getProperty('id');
+        foreach (explode("\n", $propertieSlug->getDocComment()) as $doc) {
+            $comment = trim(substr(trim($doc), 1));
+            if (explode(':', $comment)[0] == 'slug') {
+                $slug = trim(explode(':', $comment)[1]);
+                break;
+            }
+        }
+        //si on a pas de slug définis dans id
+        if (!isset($slug)) {
+            foreach ($reflexion->getProperties() as $prop) {
+                $propertiesName[] = $prop->getName();
+            }
+            foreach (['titre',  'title', 'nom', 'name', 'label', 'id'] as $motParImportance) {
+                if (
+                    in_array($motParImportance, $propertiesName)
+                ) {
+                    $slug = $motParImportance;
+                    break;
+                }
+            }
+        }
+        //on récupère la taille maxi du slug
+        $longueur = $reflexion->getProperty('slug')->getAttributes()[0]->getArguments()['length'];
+        //génération du slug
+        $slugger = new AsciiSlugger();
+        $method = 'get' . ucfirst($slug);
+        $lugGenerated = $slugger->slug($entity->$method())->lower();
+        //si le slug est trop long
+        if (strlen($lugGenerated) > $longueur - 5) { //5 est nombres de chiffres ajoutés au slug maxi
+            $lugGenerated = substr($lugGenerated, 0, strrpos(substr($lugGenerated, 0, $longueur), '-'));
+        }
+        //on récupère le dernier slug avec le même préfixe
+        $repo = $em->getRepository(get_class($entity));
+        $entityRepository = $repo->createQueryBuilder('e');
+        $entityRepository->where('e.slug LIKE :slug');
+        $entityRepository->setParameter('slug', $lugGenerated . '%');
+        $entityRepository->orderBy('e.slug', Criteria::DESC);
+        $res = $entityRepository->getQuery()->setMaxResults(1)->getOneOrNullResult();
+        //si on a un slug avec ce préfixe
+        if ($res) {
+            $inc = (int)array_reverse(explode('-', $res->getSlug()))[0] + 1;
+            //on set le slug    
+            if (strlen($lugGenerated . '-' . $inc) > $longueur) {
+                throw new \Exception('Le slug généré est trop long');
+            } else {
+                $entity->setSlug($lugGenerated . '-' . $inc);
+            }
+        } else {
+            $entity->setSlug($lugGenerated);
+        }
+        return $entity;
     }
 }
