@@ -160,7 +160,7 @@ class ToolsHelper
         //génération du slug
         $slugger = new AsciiSlugger();
         $method = 'get' . ucfirst($slug);
-        $lugGenerated = $slugger->slug($entity->$method())->lower();
+        $lugGenerated = $slugger->slug(\strip_tags($entity->$method()))->lower();
         //si le slug est trop long
         if (strlen($lugGenerated) > $longueur - 5) { //5 est nombres de chiffres ajoutés au slug maxi
             $lugGenerated = substr($lugGenerated, 0, strrpos(substr($lugGenerated, 0, $longueur), '-'));
@@ -173,7 +173,7 @@ class ToolsHelper
         $entityRepository->orderBy('e.slug', Criteria::DESC);
         $res = $entityRepository->getQuery()->setMaxResults(1)->getOneOrNullResult();
         //si on a un slug avec ce préfixe
-        if ($res) {
+        if ($res and $res->getId() != $entity->getId()) {
             $inc = (int)array_reverse(explode('-', $res->getSlug()))[0] + 1;
             //on set le slug    
             if (strlen($lugGenerated . '-' . $inc) > $longueur) {
