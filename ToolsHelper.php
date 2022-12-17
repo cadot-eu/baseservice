@@ -103,7 +103,8 @@ class ToolsHelper
         //--pretty=format:'"%h":{  "subject": "%s",%n  "date": "%aD"%n },'
         // executes after the command finishes
         if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
+            return '{}';
+            //throw new ProcessFailedException($process);
         }
         return '{' . substr($process->getOutput(), 0, -1) . '}'; //on retire la dernière virgule
     }
