@@ -27,6 +27,7 @@ class ArticleHelper
 		$tocGenerator = new TocGenerator();
 		// This generates the Table of Contents in HTML
 		$toc = $tocGenerator->getHtmlMenu($article, $top, $deep);
+		if ($toc == null) return null;
 		$dom = new \DOMDocument();
 		$dom->loadHTML(utf8_decode($toc));
 		$dom->removeChild($dom->doctype);
