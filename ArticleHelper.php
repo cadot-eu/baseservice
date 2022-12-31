@@ -11,24 +11,27 @@ use Symfony\Component\DomCrawler\Crawler;
 class ArticleHelper
 {
 
+
 	/**
-	 * It takes an article, adds an ID to all the headers, and then generates a table of contents
+	 * It takes an article, and returns a table of contents for that article
 	 * 
-	 * @param article The article to add the Table of Contents to.
-	 * @param top The top level of the table of contents.
-	 * @param deep The number of levels of headings to include in the Table of Contents.
+	 * @param article The article to generate the Table of Contents for.
+	 * @param top The top level of the table of contents. Default is 1.
+	 * @param deep The number of levels of headers to include in the Table of Contents.
 	 * 
-	 * @return The article with the table of contents added to the top of the article.
+	 * @return the table of contents for the article.
 	 */
-	public static function addSommaire($article, $top = 1, $deep = 2)
+	public static function getSommaire($article, $top = 1, $deep = 2)
 	{
 		if ($article == null) return $article;
-		$markupFixer = new MarkupFixer();
 		$tocGenerator = new TocGenerator();
-		// This ensures that all header tags have `id` attributes so they can be used as anchor links
-		$article = $markupFixer->fix($article);
 		// This generates the Table of Contents in HTML
-		return "<div class='toc'>" . $tocGenerator->getHtmlMenu($article, $top, $deep) . '</div>' . $article;
+		$toc = $tocGenerator->getHtmlMenu($article, $top, $deep);
+		$dom = new \DOMDocument();
+		$dom->loadHTML(utf8_decode($toc));
+		$dom->removeChild($dom->doctype);
+		$dom->getElementsByTagName('li')[0]->remove();
+		return "<div class='toc'>" . $dom->saveHTMl() . '</div>';
 	}
 
 	/**
