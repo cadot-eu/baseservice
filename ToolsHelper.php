@@ -108,6 +108,20 @@ class ToolsHelper
         }
         return '{' . substr($process->getOutput(), 0, -1) . '}'; //on retire la dernière virgule
     }
+    static function get_git_log_array($number)
+    {
+        $ancien = "";
+        foreach (array_reverse(json_decode(ToolsHelper::get_git_log(), true)) as $log) {
+            if ($log['subject'] != $ancien) {
+                $logs[] = $log;
+                $ancien = $log['subject'];
+            }
+            if (count($logs) == $number) {
+                return $logs;
+            }
+        }
+    }
+
     static public function knpChampsRecherche($entity)
     {
         $objetEntity = 'App\Entity\\' . ucfirst($entity);
