@@ -21,7 +21,7 @@ class ArticleHelper
 	 * 
 	 * @return the table of contents for the article.
 	 */
-	public static function getSommaire($article, $top = 1, $deep = 2)
+	public static function getSommaire($article, $top = 1, $deep = 3)
 	{
 		if ($article == null) return $article;
 		$tocGenerator = new TocGenerator();
@@ -31,7 +31,8 @@ class ArticleHelper
 		$dom = new \DOMDocument();
 		$dom->loadHTML(utf8_decode($toc));
 		$dom->removeChild($dom->doctype);
-		$dom->getElementsByTagName('li')[0]->remove();
+		//$dom->getElementsByTagName('li')[0]->remove();
+
 		return "<div class='toc'>" . $dom->saveHTMl() . '</div>';
 	}
 
