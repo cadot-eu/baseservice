@@ -96,65 +96,68 @@ class ArticleHelper
 		return $article;
 	}
 
-	// public static function addFilterLiip($texte, CacheManager $imagineCacheManager)
-	// {
-	// 	//on ajoute un filtre en fonction du champ liip
-	// 	$crawler = new Crawler($texte);
-	// 	foreach ($crawler->filter('img') as $node) {
-	// 		//@var node $node
-	// 		dd($node);
-	// 		// $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));
-	// 		// $child[0]->setAttribute('class', $node->getAttribute('class') . ' ' . $child[0]->getAttribute('class'));
-	// 		// $node->removeAttribute('style');
-	// 		// $node->removeAttribute('class');
-	// 	}
-	// 	//on vérifie aussi les img
-	// 	// foreach ($crawler->filter('img') as $node) {
-	// 	// 	$src = $node->getAttribute('src');
-	// 	// 	foreach (explode(' ', $node->getAttribute('style')) as $style) {
-	// 	// 		if (strpos($style, 'width') !== false) {
-	// 	// 			$width = explode(':', $style)[1];
-	// 	// 			$liip = str_replace(
-	// 	// 				[
-	// 	// 					';',
-	// 	// 					'%',
-	// 	// 					'0',
-	// 	// 					'1',
-	// 	// 					'2',
-	// 	// 					'3',
-	// 	// 					'4',
-	// 	// 					'5',
-	// 	// 					'6',
-	// 	// 					'7',
-	// 	// 					'8',
-	// 	// 					'9',
-	// 	// 					'.',
-	// 	// 				],
-	// 	// 				'',
-	// 	// 				$width
-	// 	// 			);
-	// 	// 			$img = 'uploads/' . explode('uploads/', $src)[1];
-	// 	// 			if ($liip) {
-	// 	// 				dump('width:' . $width);
-	// 	// 				$node->setAttribute(
-	// 	// 					'style',
-	// 	// 					str_replace(
-	// 	// 						'width:' . $width,
-	// 	// 						'',
-	// 	// 						$node->getAttribute('style')
-	// 	// 					)
-	// 	// 				);
-	// 	// 				$resolvedPath = $imagineCacheManager->getBrowserPath(
-	// 	// 					$img,
-	// 	// 					$liip
-	// 	// 				);
-	// 	// 				$node->setAttribute('src', $resolvedPath);
-	// 	// 				//dump($resolvedPath);
-	// 	// 			}
-	// 	// 			//dump($resolvedPath);
-	// 	// 		}
-	// 	// 	}
-	// 	// }
-	// 	return $crawler->html();
-	// }
+	public static function addFilterLiip($texte, CacheManager $imagineCacheManager)
+	{
+		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
+		$crawler = new Crawler($texte);
+		foreach ($crawler->filter('img') as $node) {
+			//@var node $node
+			if (substr($node->getAttribute('src'), 0, strlen('/media/cache/resolve')) != '/media/cache/resolve') {
+				$node->setAttribute('src', $imagineCacheManager->getBrowserPath($node->getAttribute('src'), 'grand'));
+			}
+
+			// $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));
+			// $child[0]->setAttribute('class', $node->getAttribute('class') . ' ' . $child[0]->getAttribute('class'));
+			// $node->removeAttribute('style');
+			// $node->removeAttribute('class');
+		}
+		return ($crawler->filter('body')->html());		//on vérifie aussi les img
+		// foreach ($crawler->filter('img') as $node) {
+		// 	$src = $node->getAttribute('src');
+		// 	foreach (explode(' ', $node->getAttribute('style')) as $style) {
+		// 		if (strpos($style, 'width') !== false) {
+		// 			$width = explode(':', $style)[1];
+		// 			$liip = str_replace(
+		// 				[
+		// 					';',
+		// 					'%',
+		// 					'0',
+		// 					'1',
+		// 					'2',
+		// 					'3',
+		// 					'4',
+		// 					'5',
+		// 					'6',
+		// 					'7',
+		// 					'8',
+		// 					'9',
+		// 					'.',
+		// 				],
+		// 				'',
+		// 				$width
+		// 			);
+		// 			$img = 'uploads/' . explode('uploads/', $src)[1];
+		// 			if ($liip) {
+		// 				dump('width:' . $width);
+		// 				$node->setAttribute(
+		// 					'style',
+		// 					str_replace(
+		// 						'width:' . $width,
+		// 						'',
+		// 						$node->getAttribute('style')
+		// 					)
+		// 				);
+		// 				$resolvedPath = $imagineCacheManager->getBrowserPath(
+		// 					$img,
+		// 					$liip
+		// 				);
+		// 				$node->setAttribute('src', $resolvedPath);
+		// 				//dump($resolvedPath);
+		// 			}
+		// 			//dump($resolvedPath);
+		// 		}
+		// 	}
+		// }
+		return $crawler->html();
+	}
 }
