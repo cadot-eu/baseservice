@@ -102,8 +102,10 @@ class ArticleHelper
 		$crawler = new Crawler($texte);
 		foreach ($crawler->filter('img') as $node) {
 			//@var node $node
-			if (substr($node->getAttribute('src'), 0, strlen('/media/cache/resolve')) != '/media/cache/resolve') {
-				$node->setAttribute('src', $imagineCacheManager->getBrowserPath($node->getAttribute('src'), 'grand'));
+			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
+				$pos = strpos($node->getAttribute('src'), '/uploads/');
+				$url = substr($node->getAttribute('src'), $pos);
+				$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, 'icone'));
 			}
 
 			// $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));
