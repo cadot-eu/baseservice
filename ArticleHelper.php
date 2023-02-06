@@ -162,4 +162,12 @@ class ArticleHelper
 		// }
 		return $crawler->html();
 	}
+	public static function addTableClass($texte, $class = "table table-striped table-bordered")
+	{
+		$crawler = new Crawler($texte);
+		foreach ($crawler->filter('table') as $node) {
+			$node->setAttribute('class', $class);
+		}
+		return $crawler->html();
+	}
 }
