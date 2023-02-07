@@ -162,12 +162,21 @@ class ArticleHelper
 		// }
 		return $crawler->html();
 	}
-	public static function addTableClass($texte, $class = "table table-striped table-bordered")
+	public static function addTableClass($texte, $class = "table table-striped table-bordered align-middle text-center")
 	{
 		$crawler = new Crawler($texte);
 		foreach ($crawler->filter('table') as $node) {
 			$node->setAttribute('class', $class);
 		}
+		return $crawler->html();
+	}
+	public static function rmtableStyle($texte)
+	{
+		$crawler = new Crawler($texte);
+		foreach ($crawler->filter('td,th,td') as $node) {
+			$node->removeAttribute('style');
+		}
+
 		return $crawler->html();
 	}
 }
