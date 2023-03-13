@@ -141,7 +141,7 @@ class ToolsHelper
         }
         return implode(',', $champs);
     }
-    static public function setSlug(EntityManagerInterface $em,  $entity)
+    static public function getSlug(EntityManagerInterface $em,  $entity): String
     {
         //$this->logActivity('persist', $args);
         //$class = get_class($args->getObject());
@@ -161,7 +161,7 @@ class ToolsHelper
             foreach ($reflexion->getProperties() as $prop) {
                 $propertiesName[] = $prop->getName();
             }
-            foreach (['titre',  'title', 'nom', 'name', 'label', 'id'] as $motParImportance) {
+            foreach (['titre',  'title', 'nom', 'name', 'label', 'terme', 'id'] as $motParImportance) {
                 if (
                     in_array($motParImportance, $propertiesName)
                 ) {
@@ -175,7 +175,12 @@ class ToolsHelper
         //génération du slug
         $slugger = new AsciiSlugger();
         $method = 'get' . ucfirst($slug);
-        $lugGenerated = $slugger->slug(\strip_tags($entity->$method()))->lower();
+        //on vérifie qu'un slug n'a pas été donné
+        if ($entity->getSlug()) {
+            $lugGenerated = $slugger->slug(\strip_tags($entity->getSlug()))->lower();
+        } else {
+            $lugGenerated = $slugger->slug(\strip_tags($entity->$method()))->lower();
+        }
         //si le slug est trop long
         if (strlen($lugGenerated) > $longueur - 5) { //5 est nombres de chiffres ajoutés au slug maxi
             $lugGenerated = substr($lugGenerated, 0, strrpos(substr($lugGenerated, 0, $longueur), '-'));
@@ -194,11 +199,26 @@ class ToolsHelper
             if (strlen($lugGenerated . '-' . $inc) > $longueur) {
                 throw new \Exception('Le slug généré est trop long');
             } else {
-                $entity->setSlug($lugGenerated . '-' . $inc);
+                return ($lugGenerated . '-' . $inc);
             }
         } else {
-            $entity->setSlug($lugGenerated);
+            return ($lugGenerated);
         }
-        return $entity;
+
+        return $lugGenerated;
+    }
+    static public function setSlug(EntityManagerInterface $em,  $entity)
+    {
+        //$objetEntity = 'App\Entity\\' . ucfirst($entity);
+        //$repo = $em->getRepository($entity);
+        return $entity->setSlug(ToolsHelper::getSlug($em, $entity));
+    }
+
+    //function pour donner l'entity d'un objet
+    static public function getEntity(EntityManagerInterface $em, String $entity, String $id)
+    {
+        $objetEntity = 'App\Entity\\' . ucfirst($entity);
+        $repo = $em->getRepository($objetEntity);
+        return $repo->find($id);
     }
 }

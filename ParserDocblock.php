@@ -90,6 +90,10 @@ class ParserDocblock
     {
         return $this->types[$name];
     }
+    public function getAllAlias(): array
+    {
+        return $this->alias;
+    }
 
     /**
      * It takes a property and returns an array of options
