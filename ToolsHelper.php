@@ -106,7 +106,7 @@ class ToolsHelper
             return '{}';
             //throw new ProcessFailedException($process);
         }
-        return '{' . substr($process->getOutput(), 0, -1) . '}'; //on retire la dernière virgule
+        return '{' . substr($process->getOutput(), 0, -1)  . '}'; //on retire la dernière virgule
     }
     static function get_git_log_array($number)
     {
