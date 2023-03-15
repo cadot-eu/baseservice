@@ -3,7 +3,9 @@
 namespace App\Service\base;
 
 use App\Repository\GlossaireRepository;
+use Imagine\File\Loader;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
+use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 use Symfony\Component\DomCrawler\Crawler;
@@ -96,17 +98,35 @@ class ArticleHelper
 		return $article;
 	}
 
-	public static function addFilterLiip($texte, CacheManager $imagineCacheManager)
+	public static function addFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
 	{
 		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
 		$crawler = new Crawler($texte);
 		foreach ($crawler->filter('img') as $node) {
 			//@var node $node
-			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
-				$pos = strpos($node->getAttribute('src'), '/uploads/');
-				$url = substr($node->getAttribute('src'), $pos);
-				$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, 'icone'));
+			//if (strpos('/media/cache', $node->getAttribute('src')) === false) {
+			$pos = strpos($node->getAttribute('src'), '/uploads/');
+			$url = substr($node->getAttribute('src'), $pos);
+			//en fonction de la taille de l'image on met un filtre
+			//on découpe le style pour récupérer la largeur
+			$width = trim(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: 500;
+			dump($width);
+			//on récupère les filtres de liip
+			$filters = $filterLoader->getFilterConfiguration()->all();
+			$filtres = [];
+			foreach ($filters as $name => $value) {
+				if (isset($value['filters']['relative_resize']['widen']))
+					$filtres[$name] = $value['filters']['relative_resize']['widen'];
 			}
+			//on sort les filtres par largeur
+			asort($filtres);
+			//on prend le filtre le plus proche de la largeur de l'image
+			$closest = array_reduce(array_keys($filtres), function ($prev, $curr) use ($filtres, $width) {
+				return (abs($filtres[$curr] - $width) < abs($filtres[$prev] - $width)) ? $curr : $prev;
+			}, array_keys($filtres)[0]);
+			dump($closest);
+			$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, $closest));
+			//}
 
 			// $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));
 			// $child[0]->setAttribute('class', $node->getAttribute('class') . ' ' . $child[0]->getAttribute('class'));
