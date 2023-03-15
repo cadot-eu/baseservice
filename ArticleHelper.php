@@ -98,7 +98,35 @@ class ArticleHelper
 		return $article;
 	}
 
-	public static function addFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
+	public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager)
+	{
+		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
+		$crawler = new Crawler($texte);
+		$filters = $filtermanager->getFilterConfiguration()->all();
+		foreach ($crawler->filter('img') as $node) {
+			//@var node $node
+			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
+				$src = $node->getAttribute('src');
+				$node->setAttribute('data-src', $src);
+				$node->removeAttribute('src');
+				$node->setAttribute('class', 'lazy');
+				$srcset = [];
+				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: getimagesize($src)[0];
+				foreach ($filters as $name => $value) {
+					//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
+					if (isset($value['filters']['relative_resize']['widen']) && ($largeur = $value['filters']['relative_resize']['widen']) < $width) {
+						$srcset[] = $imagineCacheManager->getBrowserPath('uploads/' . explode('uploads/', $src)[1], $name) . " $largeur" . "w ";
+					}
+				}
+				$node->setAttribute('data-srcset', implode(',', $srcset));
+				$max = $node->getAttribute('origin-size') ? explode(',', $node->getAttribute('origin-size'))[0] : $width;
+				$node->setAttribute('sizes', "(max-width: " . $max . "px) 100vw, " . $max . "px");
+			}
+		}
+		return $crawler->filter('body')->html();
+	}
+
+	public static function exaddFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
 	{
 		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
 		$crawler = new Crawler($texte);
@@ -125,7 +153,7 @@ class ArticleHelper
 					return (abs($filtres[$curr] - $width) < abs($filtres[$prev] - $width)) ? $curr : $prev;
 				}, array_keys($filtres)[0]);
 				dump($closest);
-				$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, $closest));
+				//$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, $closest));
 			}
 
 			// $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));

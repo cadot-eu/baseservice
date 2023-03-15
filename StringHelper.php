@@ -34,7 +34,7 @@ class StringHelper
         $deb = strpos($string, $stringdeb);
         if ($deb === false) return '';
         $fin = strpos($string, $stringfin, $deb);
-        if ($fin === false) $fin = strlen($string);
+        if ($fin === false) return false;
         return substr($string, $deb + strlen($stringdeb), $fin - $deb - strlen($stringdeb));
     }
 
