@@ -109,9 +109,9 @@ class ArticleHelper
 				$src = $node->getAttribute('src');
 				$node->setAttribute('data-src', $src);
 				$node->removeAttribute('src');
-				$node->setAttribute('class', 'lazy');
+				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
-				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: getimagesize($src)[0];
+				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($src) ? getimagesize($src)[0] : 0);
 				foreach ($filters as $name => $value) {
 					//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
 					if (isset($value['filters']['relative_resize']['widen']) && ($largeur = $value['filters']['relative_resize']['widen']) < $width) {
