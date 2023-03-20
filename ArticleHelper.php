@@ -111,7 +111,7 @@ class ArticleHelper
 				$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
-				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($src) ? getimagesize($src)[0] : 0);
+				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists('/uploads/' . explode('/uploads', $src)[1]) ? getimagesize($src)[0] : 0);
 				foreach ($filters as $name => $value) {
 					//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
 					if (isset($value['filters']['relative_resize']['widen']) && ($largeur = $value['filters']['relative_resize']['widen']) <= $width) {
@@ -123,16 +123,6 @@ class ArticleHelper
 				$max = $node->getAttribute('origin-size') ? explode(',', $node->getAttribute('origin-size'))[0] : $width;
 				$node->setAttribute('sizes', "(max-width: " . $max . "px) 100vw, " . $max . "px");
 			}
-		}
-		//remove style form figure
-		foreach ($crawler->filter('figure') as $node) {
-			//@var node $node
-			$node->removeAttribute('style');
-		}
-		//remove srtyle from se-image-container class
-		foreach ($crawler->filter('.se-image-container') as $node) {
-			//@var node $node
-			$node->removeAttribute('style');
 		}
 		return $crawler->filter('body')->html();
 	}
