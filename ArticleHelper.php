@@ -143,6 +143,20 @@ class ArticleHelper
 		return $crawler->filter('body')->html();
 	}
 
+	//fonction qui supprime les racines des liens des href
+	public static function removeRoot($texte)
+	{
+		$crawler = new Crawler($texte);
+		foreach ($crawler->filter('a') as $node) {
+			//@var node $node
+			$href = $node->getAttribute('href');
+			if (strpos($href, 'http') !== false) {
+				$node->setAttribute('href', substr($href,  strpos($href, '/', 8)));
+			}
+		}
+		return $crawler->filter('body')->html();
+	}
+
 	public static function exaddFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
 	{
 		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
