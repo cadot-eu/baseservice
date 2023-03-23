@@ -111,12 +111,27 @@ class ArticleHelper
 				$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
-				$lien = strpos('/uploads', $src) !== false ? '/uploads/' . explode('/uploads/', $src)[1] : $src;
-				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($lien) ? getimagesize($src)[0] : 0);
-				foreach ($filters as $name => $value) {
-					//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
-					if (isset($value['filters']['relative_resize']['widen']) && ($largeur = $value['filters']['relative_resize']['widen']) <= $width) {
-						$srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $largeur" . "w ";
+				if (strpos($src, '/uploads') !== false) {
+					$lien = 'uploads/' . explode('uploads/', $src)[1];
+					$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($lien) ? getimagesize($lien)[0] : 0);
+					//dump(getimagesize($lien)[0]);
+					//on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
+					foreach ($filters as $name => $value) {
+						if (isset($value['filters']['relative_resize']['widen'])) {
+							$largeur = $value['filters']['relative_resize']['widen'];
+							$filtres[$name] = $largeur;
+						}
+					}
+					//on ne garde les valeurs que si elles sont plus petites que l'image
+					$newfiltres = array_filter($filtres, function ($value) use ($width) {
+						return $value <= $width;
+					});
+					asort($filtres);
+					$resfiltres = array_slice($filtres, 0, count($newfiltres) + 1, true);
+					foreach ($resfiltres as $name => $value) {
+						//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
+
+						$srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $value" . "w ";
 					}
 				}
 				$node->removeAttribute('style');
