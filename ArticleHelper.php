@@ -111,11 +111,12 @@ class ArticleHelper
 				$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
-				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists('/uploads/' . explode('/uploads', $src)[1]) ? getimagesize($src)[0] : 0);
+				$lien = strpos('/uploads', $src) !== false ? '/uploads/' . explode('/uploads/', $src)[1] : $src;
+				$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($lien) ? getimagesize($src)[0] : 0);
 				foreach ($filters as $name => $value) {
 					//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
 					if (isset($value['filters']['relative_resize']['widen']) && ($largeur = $value['filters']['relative_resize']['widen']) <= $width) {
-						$srcset[] = $imagineCacheManager->getBrowserPath('uploads/' . explode('uploads/', $src)[1], $name) . " $largeur" . "w ";
+						$srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $largeur" . "w ";
 					}
 				}
 				$node->removeAttribute('style');
