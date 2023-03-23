@@ -108,7 +108,7 @@ class ArticleHelper
 			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
 				$src = $node->getAttribute('src');
 				$node->setAttribute('data-src', $src);
-				$node->removeAttribute('src');
+				//$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
 				if (strpos($src, '/uploads') !== false) {
