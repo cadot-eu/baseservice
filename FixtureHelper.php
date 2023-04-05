@@ -4,6 +4,7 @@ namespace App\Service\base;
 
 use Faker\Factory;
 use WW\Faker\Provider\Picture;
+use App\Service\base\ToolsHelper;
 
 class FixtureHelper
 {
@@ -25,7 +26,7 @@ class FixtureHelper
      * a YouTube video. If it is 'phrase', it returns a random text string. If it is 'float', it
      * returns a random float number. If it is
      */
-    public function generate(string $champ, $lang = 'fr_FR')
+    static public function generate(string $champ, $lang = 'fr_FR')
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
@@ -54,6 +55,9 @@ class FixtureHelper
                 break;
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
+                break;
+            case 'article':
+                return ToolsHelper::wikipedia_article_random();
                 break;
             default:
                 return null;

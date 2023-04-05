@@ -42,44 +42,20 @@ class ToolsHelper
      */
     static public function wikipedia_article_random()
     {
-        if (!function_exists('curl_init')) {
-            return false;
-        }
-        $url = 'https://en.wikipedia.org/api/rest_v1/page/random/html';
-        $options = [
-            CURLOPT_RETURNTRANSFER => true,
-            // return web page
-            CURLOPT_HEADER => false,
-            // don't return headers
-            CURLOPT_FOLLOWLOCATION => true,
-            // follow redirects
-            CURLOPT_ENCODING => "",
-            // handle all encodings
-            CURLOPT_USERAGENT => "spider",
-            // who am i
-            CURLOPT_AUTOREFERER => true,
-            // set referer on redirect
-            CURLOPT_CONNECTTIMEOUT => 30,
-            // timeout on connect
-            CURLOPT_TIMEOUT => 30,
-            // timeout on response
-            CURLOPT_MAXREDIRS => 3,
-            // stop after 10 redirects
-        ];
+        // Load the Marmiton homepage
+        $html = file_get_contents('https://www.marmiton.org/');
 
-        $ch = curl_init($url);
-        curl_setopt_array($ch, $options);
-        $content = curl_exec($ch);
-        $err = curl_errno($ch);
-        $errmsg = curl_error($ch);
-        $header = curl_getinfo($ch);
-        curl_close($ch);
-        return $content;
-        if (preg_match('/<title>(.*?)<\/title>/i', $content, $matches)) {
-            $title = str_replace(' - Wikipedia, the free encyclopedia', '', $matches[1]);
-        }
+        // Find all recipe links on the homepage
+        $recipeLinks = $html->find('a[class="recipe-card-link"]');
 
-        return '<a href="' . $header['url'] . '">' . $title . '</a>';
+        // Randomly select a recipe link
+        $randomLink = $recipeLinks[array_rand($recipeLinks)];
+
+        // Load the recipe page
+        $recipeHtml = file_get_contents($randomLink->href);
+
+        // Print the complete recipe page HTML code
+        return $recipeHtml;
     }
 
 
