@@ -11,6 +11,7 @@ use Symfony\Component\Process\Exception\ProcessFailedException;
 use ReflectionClass;
 use Symfony\Component\String\Slugger\AsciiSlugger;
 use Doctrine\Common\Collections\Criteria;
+use App\Service\base\ArticleHelper;
 
 class ToolsHelper
 {
@@ -81,21 +82,7 @@ class ToolsHelper
         return '<a href="' . $header['url'] . '">' . $title . '</a>';
     }
 
-    /**
-     * It returns an array of all the parameters in the database
-     *
-     * @param EntityManagerInterface em The entity manager
-     *
-     * @return An array of all the parameters in the database.
-     */
-    static public function params(EntityManagerInterface $em)
-    {
-        $tab = [];
-        foreach ($em->getRepository(Parametres::class)->findAll() as $parametre) {
-            $tab[AllExtension::ckclean($parametre->getSlug())] = AllExtension::ckclean($parametre->getValeur());
-        }
-        return $tab;
-    }
+
     static public function get_git_log()
     {
         $process = new Process(['git', 'log', '--pretty=format:"%h":{  "subject": "%s",%n  "date": "%aD"%n },', '--no-merges', '--reverse', '--no-color', '--no-patch', '--abbrev-commit', '--abbrev=7', '--date=short', '--decorate=full', '--all', '--']);

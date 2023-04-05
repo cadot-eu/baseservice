@@ -98,8 +98,10 @@ class ArticleHelper
 		return $article;
 	}
 
-	public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager)
+	public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager): ?string
 	{
+		//on vérifie que texte est un html
+		if (strpos($texte, '<img') === false) return $texte;
 		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
 		$crawler = new Crawler($texte);
 		$filters = $filtermanager->getFilterConfiguration()->all();
@@ -108,7 +110,7 @@ class ArticleHelper
 			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
 				$src = $node->getAttribute('src');
 				$node->setAttribute('data-src', $src);
-				//$node->removeAttribute('src');
+				$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
 				$srcset = [];
 				if (strpos($src, '/uploads') !== false) {
@@ -128,18 +130,23 @@ class ArticleHelper
 					});
 					asort($filtres);
 					$resfiltres = array_slice($filtres, 0, count($newfiltres) + 1, true);
+					$sizes = [];
+					//on supprime les clefs de même largeur
+					$resfiltres = array_unique($resfiltres);
 					foreach ($resfiltres as $name => $value) {
 						//on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
-
 						$srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $value" . "w ";
+						//on nep rend pas de largeur d'écran inférieur à 300px
+						$sizes[] = "(min-width: " . ($value + 20) . " px) $value px";
 					}
 				}
 				$node->removeAttribute('style');
 				$node->setAttribute('data-srcset', implode(',', $srcset));
 				$max = $node->getAttribute('origin-size') ? explode(',', $node->getAttribute('origin-size'))[0] : $width;
-				$node->setAttribute('sizes', "(max-width: " . $max . "px) 100vw, " . $max . "px");
+				$node->setAttribute('data-sizes', implode(',', array_reverse($sizes)));
 			}
 		}
+		if ($crawler->filter('body')->html() == null) return $crawler->html();
 		return $crawler->filter('body')->html();
 	}
 
