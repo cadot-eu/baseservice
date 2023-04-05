@@ -9,7 +9,23 @@ class FixtureHelper
 {
 
 
-    static public function generate(string $champ, $lang = 'fr_FR')
+
+
+
+
+    /**
+     * This PHP function generates random data based on the input field type.
+     * 
+     * @param string image,youtube,phrase,float,icon,texte,texte_mark
+     * @param lang The language in which the generated data should be returned. It has a default value
+     * of 'fr_FR' if not specified.
+     * 
+     * @return different values depending on the value of the `` parameter. If `` is
+     * 'image', it returns a URL to a randomly generated image. If it is 'youtube', it returns a URL to
+     * a YouTube video. If it is 'phrase', it returns a random text string. If it is 'float', it
+     * returns a random float number. If it is
+     */
+    public function generate(string $champ, $lang = 'fr_FR')
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
@@ -44,6 +60,10 @@ class FixtureHelper
                 break;
         }
     }
+
+
+
+
 
     /**
      * The function adds a number of values to a page based on the number of values in the template
