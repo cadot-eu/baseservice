@@ -157,7 +157,8 @@ class ArticleHelper
 		foreach ($crawler->filter('a') as $node) {
 			//@var node $node
 			$href = $node->getAttribute('href');
-			if (strpos($href, 'http') !== false) {
+
+			if (strpos($href, 'http') !== false && strpos($href, 'picbleu.fr') !== false) {
 				$node->setAttribute('href', substr($href,  strpos($href, '/', 8)));
 			}
 		}
