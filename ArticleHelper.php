@@ -165,7 +165,7 @@ class ArticleHelper
 				if ($redimensionnement and $max) {
 					$max = intval($max) * intval($redimensionnement) / 100;
 				}
-				$node->setAttribute('style', "max-width: " . $max . "px");
+				$node->setAttribute('style', "max-width:min(100%, " . $max . "px)");
 			}
 		}
 		if ($crawler->filter('body')->html() == null) return $crawler->html();
