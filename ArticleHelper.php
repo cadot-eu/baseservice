@@ -100,18 +100,29 @@ class ArticleHelper
 
 	public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager): ?string
 	{
+		$redimensionnement = 0;
 		//on vérifie que texte est un html
 		if (strpos($texte, '<img') === false) return $texte;
 		//on ajoute un filtre en fonction du champ liip ou au pire on met moyen
 		$crawler = new Crawler($texte);
 		$filters = $filtermanager->getFilterConfiguration()->all();
 		foreach ($crawler->filter('img') as $node) {
+			//on supprime les styles de largeur du dessus pour figure et conteneur et on récupère le redimensionnement
+			$parent = $node->parentNode->nodeName == 'a' ? $node->parentNode->parentNode : $node->parentNode;
+			if ($parent->nodeName == 'figure') { //anttention andré à tendance à mettre des figures dans des figures
+				$style = $parent->parentNode->getAttribute('style');
+				$redimensionnement = trim(StringHelper::chaine_extract($style, 'width:', '%'));
+				$parent->setAttribute('style', "width: auto");
+				$parent->parentNode->setAttribute('style', "width: auto");
+			}
 			//@var node $node
 			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
+				//on passe le src en data-src pour lazy
 				$src = $node->getAttribute('src');
 				$node->setAttribute('data-src', $src);
 				$node->removeAttribute('src');
 				$node->setAttribute('class', 'lazy img-fluid');
+				//on récupère les filtres
 				$srcset = [];
 				if (strpos($src, '/uploads') !== false) {
 					$lien = 'uploads/' . explode('uploads/', $src)[1];
@@ -142,11 +153,47 @@ class ArticleHelper
 				}
 				$node->removeAttribute('style');
 				$node->setAttribute('data-srcset', implode(',', $srcset));
-				$max = $node->getAttribute('origin-size') ? explode(',', $node->getAttribute('origin-size'))[0] : $width;
-				$node->setAttribute('data-sizes', implode(',', array_reverse($sizes)));
+
+				//on met une taille maxi pour éviter les upscales
+				// Create an array of non-zero variables
+				$nonZeroVars = array_filter([explode(',', $node->getAttribute('data-size'))[0], explode(',', $node->getAttribute('origin-size'))[0]], function ($var) {
+					return $var !== 0;
+				});
+				$max = min($nonZeroVars) ? min($nonZeroVars) : $width;
+				$max = str_replace('px', '', $max);
+				//on ajoute le redimensionnement si il y en a un
+				if ($redimensionnement and $max) {
+					$max = $max * $redimensionnement / 100;
+				}
+				$node->setAttribute('style', "max-width: " . $max . "px");
 			}
 		}
 		if ($crawler->filter('body')->html() == null) return $crawler->html();
+		return $crawler->filter('body')->html();
+	}
+
+	static public function removeFigureInclusFigure($texte)
+	{
+		$crawler = new Crawler($texte);
+		foreach ($crawler->filter('figure') as $node) {
+			//on liste tous les parents
+			$parents = [];
+			$parent = $node->parentNode;
+			$secomponent = $node->parentNode;
+			//peux déclencher une exception si le parent n'a pas de nodename
+			try {
+				while ($parent->nodeName != 'body') {
+					$parents[] = $parent;
+					$parent = $parent->parentNode;
+				}
+				foreach ($parents as $parent) {
+					if ($parent->nodeName == 'figure') {
+						$parent->parentNode->replaceChild($secomponent, $parent);
+					}
+				}
+			} catch (\Exception $e) {
+			}
+		}
 		return $crawler->filter('body')->html();
 	}
 
