@@ -181,17 +181,14 @@ class ArticleHelper
 			$parent = $node->parentNode;
 			$secomponent = $node->parentNode;
 			//peux déclencher une exception si le parent n'a pas de nodename
-			try {
-				while ($parent->nodeName != 'body') {
-					$parents[] = $parent;
-					$parent = $parent->parentNode;
+			while ($parent and $parent->nodeName != 'body') {
+				$parents[] = $parent;
+				$parent = $parent->parentNode;
+			}
+			foreach ($parents as $parent) {
+				if ($parent->parentNode and $parent->nodeName == 'figure') {
+					$parent->parentNode->replaceChild($secomponent, $parent);
 				}
-				foreach ($parents as $parent) {
-					if ($parent->nodeName == 'figure') {
-						$parent->parentNode->replaceChild($secomponent, $parent);
-					}
-				}
-			} catch (\Exception $e) {
 			}
 		}
 		return $crawler->filter('body')->html();
