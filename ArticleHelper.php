@@ -163,7 +163,7 @@ class ArticleHelper
 				$max = str_replace('px', '', $max);
 				//on ajoute le redimensionnement si il y en a un
 				if ($redimensionnement and $max) {
-					$max = $max * $redimensionnement / 100;
+					$max = intval($max) * intval($redimensionnement) / 100;
 				}
 				$node->setAttribute('style', "max-width: " . $max . "px");
 			}
