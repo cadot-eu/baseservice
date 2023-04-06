@@ -121,13 +121,15 @@ class ArticleHelper
 				$src = $node->getAttribute('src');
 				$node->setAttribute('data-src', $src);
 				$node->removeAttribute('src');
-				$node->setAttribute('class', 'lazy img-fluid');
+				$node->setAttribute('class', 'lazy');
 				//on récupère les filtres
 				$srcset = [];
+				$width = 0;
 				if (strpos($src, '/uploads') !== false) {
 					$lien = 'uploads/' . explode('uploads/', $src)[1];
-					$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: (file_exists($lien) ? getimagesize($lien)[0] : 0);
-					//dump(getimagesize($lien)[0]);
+					$width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px'));
+					if ($width == 0 and file_exists($lien))
+						$width = getimagesize($lien)[0];
 					//on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
 					foreach ($filters as $name => $value) {
 						if (isset($value['filters']['relative_resize']['widen'])) {
@@ -156,11 +158,8 @@ class ArticleHelper
 
 				//on met une taille maxi pour éviter les upscales
 				// Create an array of non-zero variables
-				$nonZeroVars = array_filter([explode(',', $node->getAttribute('data-size'))[0], explode(',', $node->getAttribute('origin-size'))[0]], function ($var) {
-					return $var !== 0;
-				});
-				$max = min($nonZeroVars) ? min($nonZeroVars) : $width;
-				$max = str_replace('px', '', $max);
+				$valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
+				$max = max(array_filter($valeursPossibles));
 				//on ajoute le redimensionnement si il y en a un
 				if ($redimensionnement and $max) {
 					$max = intval($max) * intval($redimensionnement) / 100;
