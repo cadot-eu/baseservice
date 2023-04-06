@@ -176,18 +176,21 @@ class ArticleHelper
 	{
 		$crawler = new Crawler($texte);
 		foreach ($crawler->filter('figure') as $node) {
-			//on liste tous les parents
-			$parents = [];
-			$parent = $node->parentNode;
-			$secomponent = $node->parentNode;
-			//peux déclencher une exception si le parent n'a pas de nodename
-			while ($parent and $parent->nodeName != 'body') {
-				$parents[] = $parent;
-				$parent = $parent->parentNode;
-			}
-			foreach ($parents as $parent) {
-				if ($parent->parentNode and $parent->nodeName == 'figure') {
-					$parent->parentNode->replaceChild($secomponent, $parent);
+			//si on a pas une class table
+			if (strpos($node->getAttribute('class'), 'table') !== false) {
+				//on liste tous les parents
+				$parents = [];
+				$parent = $node->parentNode;
+				$secomponent = $node->parentNode;
+				//peux déclencher une exception si le parent n'a pas de nodename
+				while ($parent and $parent->nodeName != 'body') {
+					$parents[] = $parent;
+					$parent = $parent->parentNode;
+				}
+				foreach ($parents as $parent) {
+					if ($parent->parentNode and $parent->nodeName == 'figure') {
+						$parent->parentNode->replaceChild($secomponent, $parent);
+					}
 				}
 			}
 		}
