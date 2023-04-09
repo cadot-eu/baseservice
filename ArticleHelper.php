@@ -108,12 +108,13 @@ class ArticleHelper
 		$filters = $filtermanager->getFilterConfiguration()->all();
 		foreach ($crawler->filter('img') as $node) {
 			//on supprime les styles de largeur du dessus pour figure et conteneur et on récupère le redimensionnement
-			$parent = $node->parentNode->nodeName == 'a' ? $node->parentNode->parentNode : $node->parentNode;
-			if ($parent->nodeName == 'figure') { //anttention andré à tendance à mettre des figures dans des figures
-				$style = $parent->parentNode->getAttribute('style');
+			$figure = $node->parentNode->nodeName == 'a' ? $node->parentNode->parentNode : $node->parentNode;
+			if ($figure->nodeName == 'figure') { //anttention andré à tendance à mettre des figures dans des figures
+				$style = $figure->parentNode->getAttribute('style');
 				$redimensionnement = trim(StringHelper::chaine_extract($style, 'width:', '%'));
-				$parent->setAttribute('style', "width: auto");
-				$parent->parentNode->setAttribute('style', "width: auto");
+				$figure->setAttribute('style', "width: auto");
+				$figure->parentNode->setAttribute('style', "width: auto");
+				$figure->setAttribute('style', "margin:auto;");
 			}
 			//@var node $node
 			if (strpos('/media/cache', $node->getAttribute('src')) === false) {
@@ -159,12 +160,12 @@ class ArticleHelper
 				//on met une taille maxi pour éviter les upscales
 				// Create an array of non-zero variables
 				$valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
-				$max = max(array_filter($valeursPossibles));
+				$max = min(array_filter($valeursPossibles));
 				//on ajoute le redimensionnement si il y en a un
 				if ($redimensionnement and $max) {
 					$max = intval($max) * intval($redimensionnement) / 100;
 				}
-				$node->setAttribute('style', "max-width:min(100%, " . $max . "px)");
+				$node->setAttribute('style', "width:" . $max . "px;max-width:100%;");
 			}
 		}
 		if ($crawler->filter('body')->html() == null) return $crawler->html();
@@ -177,18 +178,10 @@ class ArticleHelper
 		foreach ($crawler->filter('figure') as $node) {
 			//si on a pas une class table
 			if (strpos($node->getAttribute('class'), 'table') !== false) {
-				//on liste tous les parents
-				$parents = [];
-				$parent = $node->parentNode;
-				$secomponent = $node->parentNode;
-				//peux déclencher une exception si le parent n'a pas de nodename
-				while ($parent and $parent->nodeName != 'body') {
-					$parents[] = $parent;
-					$parent = $parent->parentNode;
-				}
-				foreach ($parents as $parent) {
-					if ($parent->parentNode and $parent->nodeName == 'figure') {
-						$parent->parentNode->replaceChild($secomponent, $parent);
+				//on regarde tous les enfants et on supprime les figures enfants
+				foreach ($node->childNodes as $child) {
+					if ($child->nodeName == 'figure') {
+						$node->removeChild($child);
 					}
 				}
 			}
