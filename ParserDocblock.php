@@ -72,6 +72,7 @@ class ParserDocblock
     }
     public function getArgumentOfAttributes(string $name, $nameAttribute, $nameArgument)
     {
+        if (!isset($this->getAttribute($name, $nameAttribute)->getArguments()[$nameArgument])) return null;
         return $this->getAttribute($name, $nameAttribute)->getArguments()[$nameArgument];
     }
     public function getProperty($name): \ReflectionProperty
