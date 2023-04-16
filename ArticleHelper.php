@@ -160,7 +160,7 @@ class ArticleHelper
 				//on met une taille maxi pour éviter les upscales
 				// Create an array of non-zero variables
 				$valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
-				$max = min(array_filter($valeursPossibles));
+				$max = count($valeursPossibles)?min(array_filter($valeursPossibles)):null;
 				//on ajoute le redimensionnement si il y en a un
 				if ($redimensionnement and $max) {
 					$max = intval($max) * intval($redimensionnement) / 100;
