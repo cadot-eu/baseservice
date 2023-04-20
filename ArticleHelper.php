@@ -165,7 +165,6 @@ class ArticleHelper
                 //on met une taille maxi pour éviter les upscales
                 // Create an array of non-zero variables
                 $valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
-                dump($valeursPossibles);
                 switch (count(array_filter($valeursPossibles))) {
                     case 0:
                         $max = 0;
