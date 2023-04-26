@@ -111,7 +111,10 @@ class ArticleHelper
         $crawler = new Crawler($texte);
         $filters = $filtermanager->getFilterConfiguration()->all();
         foreach ($crawler->filter('img') as $node) {
-            //on supprime les styles de largeur du dessus pour figure et conteneur et on récupère le redimensionnement
+            //variables
+            //on récupère les filtres
+            $srcset = [];
+            //on récupère le parent et on vérifie qu'il s'agit bien d'une figure et on récupère le redimensionnement et on le supprime et om met en taille auto
             $figure = $node->parentNode->nodeName == 'a' ? $node->parentNode->parentNode : $node->parentNode;
             if ($figure->nodeName == 'figure') { //anttention andré à tendance à mettre des figures dans des figures
                 $style = $figure->parentNode->getAttribute('style');
@@ -127,20 +130,24 @@ class ArticleHelper
                 $node->setAttribute('data-src', $src);
                 $node->removeAttribute('src');
                 $node->setAttribute('class', 'lazy');
-                //on récupère les filtres
-                $srcset = [];
-                $width = 0;
+                $lien = 'uploads/' . explode('uploads/', $src)[1];
+                // on vérifie que l'on est dans le cas d'un image chargée par l'utilisateur
                 if (strpos($src, '/uploads') !== false) {
-                    $lien = 'uploads/' . explode('uploads/', $src)[1];
-                    $width = intval(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px'));
-                    if ($width == 0 and file_exists($lien)) {
+                   //on vérifie que l'image existe et on récupère sa largeur
+                    if (file_exists($lien)) {
                         $width = getimagesize($lien)[0];
                     }
+                    // si on a un redimensionement on l'applique sur la taille de l'image
+                    //on ajoute le redimensionnement si il y en a un
+                    if ($redimensionnement and $width) {
+                        $width = intval($width) * intval($redimensionnement) / 100;
+                    }
+
                     //on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
                     foreach ($filters as $name => $value) {
                         if (isset($value['filters']['relative_resize']['widen'])) {
-                            $largeur = $value['filters']['relative_resize']['widen'];
-                            $filtres[$name] = $largeur;
+                            $largeurFiltre = $value['filters']['relative_resize']['widen'];
+                            $filtres[$name] = $largeurFiltre;
                         }
                     }
                     //on ne garde les valeurs que si elles sont plus petites que l'image
@@ -149,9 +156,9 @@ class ArticleHelper
                     });
                     asort($filtres);
                     $resfiltres = array_slice($filtres, 0, count($newfiltres) + 1, true);
-                    $sizes = [];
                     //on supprime les clefs de même largeur
                     $resfiltres = array_unique($resfiltres);
+
                     foreach ($resfiltres as $name => $value) {
                         //on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
                         $srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $value" . "w ";
@@ -161,26 +168,7 @@ class ArticleHelper
                 }
                 $node->removeAttribute('style');
                 $node->setAttribute('data-srcset', implode(',', $srcset));
-
-                //on met une taille maxi pour éviter les upscales
-                // Create an array of non-zero variables
-                $valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
-                switch (count(array_filter($valeursPossibles))) {
-                    case 0:
-                        $largeur = 0;
-                        break;
-                    case 1:
-                        $largeur = array_filter($valeursPossibles)[0];
-                        break;
-                    default:
-                        $largeur = min(array_filter($valeursPossibles));
-                        break;
-                }
-                //on ajoute le redimensionnement si il y en a un
-                if ($redimensionnement and $width) {
-                    $largeur = intval($width) * intval($redimensionnement) / 100;
-                }
-                $node->setAttribute('style', "width:" . $largeur . "px;max-width:100%;");
+                $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
             }
         }
         if ($crawler->filter('body')->html() == null) {
