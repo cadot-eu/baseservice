@@ -134,16 +134,20 @@ class ArticleHelper
                 $width = 0;
                 // on vérifie que l'on est dans le cas d'un image chargée par l'utilisateur
                 if (strpos($src, '/uploads') !== false) {
+                    //si on a une taille donnée
+                    if ($node->getAttribute('data-origin') && explode(',', $node->getAttribute('data-origin'))[0]) {
+                        $width = explode('px', explode(',', $node->getAttribute('data-origin'))[0])[0];
+                    } else {
                    //on vérifie que l'image existe et on récupère sa largeur
-                    if (file_exists($lien)) {
-                        $width = getimagesize($lien)[0];
-                    }
+                        if (file_exists($lien)) {
+                            $width = getimagesize($lien)[0];
+                        }
                     // si on a un redimensionement on l'applique sur la taille de l'image
                     //on ajoute le redimensionnement si il y en a un
-                    if ($redimensionnement and $width) {
-                        $width = intval($width) * intval($redimensionnement) / 100;
+                        if ($redimensionnement and $width) {
+                            $width = intval($width) * intval($redimensionnement) / 100;
+                        }
                     }
-
                     //on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
                     foreach ($filters as $name => $value) {
                         if (isset($value['filters']['relative_resize']['widen'])) {
