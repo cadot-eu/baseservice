@@ -130,18 +130,24 @@ class ArticleHelper
                 $node->setAttribute('data-src', $src);
                 $node->removeAttribute('src');
                 $node->setAttribute('class', 'lazy');
-                $lien = 'uploads/' . explode('uploads/', $src)[1];
+                $lien = urldecode('/app/public/uploads/' . explode('uploads/', $src)[1]);
                 // on vérifie que l'on est dans le cas d'un image chargée par l'utilisateur
                 if (strpos($src, '/uploads') !== false) {
                    //on vérifie que l'image existe et on récupère sa largeur
                     if (file_exists($lien)) {
-                        $width = getimagesize($lien)[0];
+                        //si on a une taille déjà donnée on la récupère
+                        if ($node->getAttribute('data-size') && strpos($node->getAttribute('data-size'), 'px') !== false) {
+                            $width = explode('px', explode(',', $node->getAttribute('data-size'))[0])[0] ;
+                        } else {
+                            $width = getimagesize($lien)[0];
+                            if ($redimensionnement) {
+                                $width = intval($width) * intval($redimensionnement) / 100;
+                            }
+                        }
+                    } else {
+                        dd('erreur image non trouvée : ' . $lien);
                     }
-                    // si on a un redimensionement on l'applique sur la taille de l'image
-                    //on ajoute le redimensionnement si il y en a un
-                    if ($redimensionnement and $width) {
-                        $width = intval($width) * intval($redimensionnement) / 100;
-                    }
+
 
                     //on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
                     foreach ($filters as $name => $value) {
