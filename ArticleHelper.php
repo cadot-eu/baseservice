@@ -167,20 +167,20 @@ class ArticleHelper
                 $valeursPossibles = [$width, intval(str_replace('px', '', explode(',', $node->getAttribute('data-size'))[0])), intval(str_replace('px', '', explode(',', $node->getAttribute('origin-size'))[0]))];
                 switch (count(array_filter($valeursPossibles))) {
                     case 0:
-                        $max = 0;
+                        $largeur = 0;
                         break;
                     case 1:
-                        $max = array_filter($valeursPossibles)[0];
+                        $largeur = array_filter($valeursPossibles)[0];
                         break;
                     default:
-                        $max = min(array_filter($valeursPossibles));
+                        $largeur = min(array_filter($valeursPossibles));
                         break;
                 }
                 //on ajoute le redimensionnement si il y en a un
-                if ($redimensionnement and $max) {
-                    $max = intval($max) * intval($redimensionnement) / 100;
+                if ($redimensionnement and $width) {
+                    $largeur = intval($width) * intval($redimensionnement) / 100;
                 }
-                $node->setAttribute('style', "width:" . $max . "px;max-width:100%;");
+                $node->setAttribute('style', "width:" . $largeur . "px;max-width:100%;");
             }
         }
         if ($crawler->filter('body')->html() == null) {
