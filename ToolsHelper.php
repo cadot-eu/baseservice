@@ -20,7 +20,7 @@ class ToolsHelper
      *
      * @return An array of enabled locales.
      */
-    static public function get_langs()
+    public static function get_langs()
     {
         $yaml = new Yaml();
         if (file_exists('/app/config/packages/translation.yaml')) {
@@ -40,7 +40,7 @@ class ToolsHelper
      *
      * @return the content of the page.
      */
-    static public function wikipedia_article_random()
+    public static function wikipedia_article_random()
     {
         // Load the Marmiton homepage
         $html = file_get_contents('https://www.marmiton.org/');
@@ -59,7 +59,7 @@ class ToolsHelper
     }
 
 
-    static public function get_git_log()
+    public static function get_git_log()
     {
         $process = new Process(['git', 'log', '--pretty=format:"%h":{  "subject": "%s",%n  "date": "%aD"%n },', '--no-merges', '--reverse', '--no-color', '--no-patch', '--abbrev-commit', '--abbrev=7', '--date=short', '--decorate=full', '--all', '--']);
         $process->run();
@@ -69,7 +69,12 @@ class ToolsHelper
             return '{}';
             //throw new ProcessFailedException($process);
         }
-        return '{' . substr($process->getOutput(), 0, -1)  . '}'; //on retire la dernière virgule
+        $json = '{' . substr($process->getOutput(), 0, -1)  . '}'; //on retire la dernière virgule
+        if (json_decode($json) == null) {
+            return '{}';
+        } else {
+            return $json;
+        }
     }
     static function get_git_log_array($number)
     {
@@ -85,10 +90,10 @@ class ToolsHelper
         }
     }
 
-    static public function knpChampsRecherche($entity)
+    public static function knpChampsRecherche($entity)
     {
         $objetEntity = 'App\Entity\\' . ucfirst($entity);
-        $reflexion = new ReflectionClass(new $objetEntity);
+        $reflexion = new ReflectionClass(new $objetEntity());
         if ($reflexion->hasProperty('ordre')) {
             $ordre = 'a.ordre';
         } else {
@@ -104,7 +109,7 @@ class ToolsHelper
         }
         return implode(',', $champs);
     }
-    static public function getSlug(EntityManagerInterface $em,  $entity): String
+    public static function getSlug(EntityManagerInterface $em, $entity): string
     {
         //$this->logActivity('persist', $args);
         //$class = get_class($args->getObject());
@@ -158,7 +163,7 @@ class ToolsHelper
         //si on a un slug avec ce préfixe
         if ($res and $res->getId() != $entity->getId()) {
             $inc = (int)array_reverse(explode('-', $res->getSlug()))[0] + 1;
-            //on set le slug    
+            //on set le slug
             if (strlen($lugGenerated . '-' . $inc) > $longueur) {
                 throw new \Exception('Le slug généré est trop long');
             } else {
@@ -170,7 +175,7 @@ class ToolsHelper
 
         return $lugGenerated;
     }
-    static public function setSlug(EntityManagerInterface $em,  $entity)
+    public static function setSlug(EntityManagerInterface $em, $entity)
     {
         //$objetEntity = 'App\Entity\\' . ucfirst($entity);
         //$repo = $em->getRepository($entity);
@@ -178,7 +183,7 @@ class ToolsHelper
     }
 
     //function pour donner l'entity d'un objet
-    static public function getEntity(EntityManagerInterface $em, String $entity, String $id)
+    public static function getEntity(EntityManagerInterface $em, string $entity, string $id)
     {
         $objetEntity = 'App\Entity\\' . ucfirst($entity);
         $repo = $em->getRepository($objetEntity);
