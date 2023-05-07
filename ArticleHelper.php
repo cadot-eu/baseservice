@@ -119,6 +119,7 @@ class ArticleHelper
             if ($figure->nodeName == 'figure') { //anttention andré à tendance à mettre des figures dans des figures
                 $style = $figure->parentNode->getAttribute('style');
                 $redimensionnement = trim(StringHelper::chaine_extract($style, 'width:', '%'));
+                $figure->setAttribute('style', "width: auto");
                 $figure->parentNode->setAttribute('style', "width: auto");
                 $figure->setAttribute('style', "margin:auto;");
             }
@@ -135,11 +136,7 @@ class ArticleHelper
                 if (strpos($src, '/uploads') !== false) {
                     //si on a un data-size on le récupère
                     if ($node->getAttribute('data-size')) {
-                        if (strpos($node->getAttribute('data-size'), 'px') !== false) {
-                            $width = intval(explode(',', $node->getAttribute('data-size'))[0]);
-                        } else {
-                            $width = 1920 * intval(explode(',', $node->getAttribute('data-size'))[0]) / 100;
-                        }
+                        $width = intval(explode(',', $node->getAttribute('data-size'))[0]);
                     }
                 //     //si on a une taille donnée
                 //     elseif ($node->getAttribute('data-origin') && explode(',', $node->getAttribute('data-origin'))[0] && strpos('px', $node->getAttribute('data-origin'))) {
@@ -178,21 +175,11 @@ class ArticleHelper
                         //on ne prend que les filtres qui sont plus petit que l'image et qui utilisent la largeur
                         $srcset[] = $imagineCacheManager->getBrowserPath($lien, $name) . " $value" . "w ";
                         //on nep rend pas de largeur d'écran inférieur à 300px
-
                         $sizes[] = "(min-width: " . ($value + 20) . " px) $value px";
                     }
                 }
                 $node->removeAttribute('style');
                 $node->setAttribute('data-srcset', implode(',', $srcset));
-                if ($node->getAttribute('data-size')) {
-                    if (strpos($node->getAttribute('data-size'), 'px') !== false) {
-                        $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
-                    } else {
-                        $node->setAttribute('style', "width:" . explode(',', $node->getAttribute('data-size'))[0] . ";");
-                        $node->parentNode->setAttribute('style', "text-align:center;");
-                    }
-                }
-            } else {
                 $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
             }
         }
