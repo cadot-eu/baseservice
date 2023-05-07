@@ -128,36 +128,25 @@ class ArticleHelper
                 $src = $node->getAttribute('src');
                 $node->setAttribute('data-src', $src);
                 $node->removeAttribute('src');
-                $node->setAttribute('class', 'lazy');
+                $node->setAttribute('class', 'img-fluid');
                 $lien = 'uploads/' . explode('uploads/', $src)[1];
-                $width = 0;
+                //on donne la taille de l'image
+                //on récupère la largeur de l'image
+                $file = $node->getAttribute('data-src')[0] == '/' ? substr($node->getAttribute('data-src'), 1) : $node->getAttribute('data-src');
+                //on suprrime l'url de l'image
+                $imgClean = explode('uploads/', $file)[1];
+                $width = getimagesize('/app/public/uploads/' . $imgClean)[0];
                 // on vérifie que l'on est dans le cas d'un image chargée par l'utilisateur
                 if (strpos($src, '/uploads') !== false) {
                     //si on a un data-size on le récupère
                     if ($node->getAttribute('data-size')) {
                         if (strpos($node->getAttribute('data-size'), 'px') !== false) {
                             $width = intval(explode(',', $node->getAttribute('data-size'))[0]);
-                        } else {
+                        }
+                        if (strpos($node->getAttribute('data-size'), '%') !== false) {
                             $width = 1920 * intval(explode(',', $node->getAttribute('data-size'))[0]) / 100;
                         }
                     }
-                //     //si on a une taille donnée
-                //     elseif ($node->getAttribute('data-origin') && explode(',', $node->getAttribute('data-origin'))[0] && strpos('px', $node->getAttribute('data-origin'))) {
-                //         $width = explode(',', $node->getAttribute('data-origin'))[0];
-                //         if (strpos($width, 'px')) {
-                //             $width = intval($width);
-                //         }
-                //     } else {
-                //    //on vérifie que l'image existe et on récupère sa largeur
-                //         if (file_exists($lien)) {
-                //             $width = getimagesize($lien)[0];
-                //         }
-                //     // si on a un redimensionement on l'applique sur la taille de l'image
-                //     //on ajoute le redimensionnement si il y en a un
-                //         if ($redimensionnement and $width) {
-                //             $width = intval($width) * intval($redimensionnement) / 100;
-                //         }
-                //     }
                     //on trie les filtres par largeur pour ne garder que ceux qui sont plus petits que l'image plus un filtre plus grand
                     foreach ($filters as $name => $value) {
                         if (isset($value['filters']['relative_resize']['widen'])) {
@@ -184,16 +173,14 @@ class ArticleHelper
                 }
                 $node->removeAttribute('style');
                 $node->setAttribute('data-srcset', implode(',', $srcset));
-                if ($node->getAttribute('data-size')) {
-                    if (strpos($node->getAttribute('data-size'), 'px') !== false) {
-                        $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
-                    } else {
-                        $node->setAttribute('style', "width:" . explode(',', $node->getAttribute('data-size'))[0] . ";");
-                        $node->parentNode->setAttribute('style', "text-align:center;");
-                    }
+                if (strpos($node->getAttribute('data-size'), 'px') !== false) {
+                    $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
+                } elseif (strpos($node->getAttribute('data-size'), '%') !== false) {
+                    $node->setAttribute('style', "width:" . explode(',', $node->getAttribute('data-size'))[0] . ";");
+                    $node->parentNode->setAttribute('style', "text-align:center;");
+                } else {
+                    $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
                 }
-            } else {
-                $node->setAttribute('style', "width:" . $width . "px;max-width:100%;");
             }
         }
         if ($crawler->filter('body')->html() == null) {
