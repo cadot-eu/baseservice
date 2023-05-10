@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'vide', 'normal', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass'])
+    public function __construct(string $entity = '', array $baseAlias = ['simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
@@ -35,19 +35,19 @@ class ParserDocblock
 
     /**
      * It sets the entity and the reflection of the class.
-     * 
+     *
      * @param string The name of the class that is being called.
      */
     public function setEntity($string): void
     {
         $this->Entity = ucfirst($string);
         $class = 'App\Entity\\' . $this->Entity;
-        $this->reflexion = new \ReflectionClass(new $class);
+        $this->reflexion = new \ReflectionClass(new $class());
     }
 
     /**
      *  Returns the reflection of the class
-     * 
+     *
      * @return \ReflectionClass The reflection class of the class that is being called.
      */
     public function getReflexion(): \ReflectionClass
@@ -61,9 +61,13 @@ class ParserDocblock
 
     public function getAttribute(string $name, $nameAttribute): \ReflectionAttribute
     {
-        foreach ($this->getAttributes($name) as  $num => $attribute) {
-            if (is_string($nameAttribute) && $attribute->getName() == $nameAttribute) return $attribute;
-            if (is_integer($nameAttribute) && $num == $nameAttribute) return $attribute;
+        foreach ($this->getAttributes($name) as $num => $attribute) {
+            if (is_string($nameAttribute) && $attribute->getName() == $nameAttribute) {
+                return $attribute;
+            }
+            if (is_integer($nameAttribute) && $num == $nameAttribute) {
+                return $attribute;
+            }
         };
     }
     public function getArgumentsOfAttributes(string $name, $nameAttribute): array
@@ -72,7 +76,9 @@ class ParserDocblock
     }
     public function getArgumentOfAttributes(string $name, $nameAttribute, $nameArgument)
     {
-        if (!isset($this->getAttribute($name, $nameAttribute)->getArguments()[$nameArgument])) return null;
+        if (!isset($this->getAttribute($name, $nameAttribute)->getArguments()[$nameArgument])) {
+            return null;
+        }
         return $this->getAttribute($name, $nameAttribute)->getArguments()[$nameArgument];
     }
     public function getProperty($name): \ReflectionProperty
@@ -98,7 +104,7 @@ class ParserDocblock
 
     /**
      * It takes a property and returns an array of options
-     * 
+     *
      * @param \ReflectionProperty property The property to be processed
      */
     private function parseOptions(\ReflectionProperty $property)
@@ -138,25 +144,27 @@ class ParserDocblock
     }
     /**
      * It takes a string, decodes it as JSON, and returns the decoded object
-     * 
+     *
      * @param string The string being decoded.
      * @param bool If this is true, then the object will be converted into an associative array.
-     * 
+     *
      * @return the value of the variable .
      */
     public function jsondecode($string, $bool = false)
     {
-        $json = json_decode($string,  $bool);
-        if ($json == null && $string != '') dd('!!erreur de syntaxe sur' . $string);
+        $json = json_decode($string, $bool);
+        if ($json == null && $string != '') {
+            dd('!!erreur de syntaxe sur' . $string);
+        }
         return $json;
     }
 
 
     /**
      * It returns the type of the property
-     * 
+     *
      * @param \ReflectionProperty property The property to be analyzed
-     * 
+     *
      * @return string The type of the property.
      */
     public function findType(\ReflectionProperty $property): string
@@ -164,19 +172,21 @@ class ParserDocblock
         $tab = '';
         foreach ($property->getAttributes() as $attr) {
             $fin = strtolower(array_reverse(explode('\\', $attr->getName()))[0]);
-            if ($fin == 'column' && !$tab)
+            if ($fin == 'column' && !$tab) {
                 $tab = isset($attr) && isset($attr->getArguments()['type']) ? $attr->getArguments()['type'] : '';
-            if ($fin != 'column')
+            }
+            if ($fin != 'column') {
                 $tab = strtolower(array_reverse(explode('\\', $attr->getName()))[0]);
+            }
         }
         return $tab;
     }
 
     /**
      * It removes all the characters in the second parameter from the first parameter
-     * 
+     *
      * @param string The string to be cleaned.
-     * 
+     *
      * @return string The string with all the whitespace removed.
      */
     public function clean($string): string
@@ -185,9 +195,9 @@ class ParserDocblock
     }
     /**
      * This function returns the name of the property
-     * 
+     *
      * @param \ReflectionProperty property The property that is being serialized.
-     * 
+     *
      * @return string The name of the property.
      */
     public function getName(\ReflectionProperty $property): string
@@ -196,9 +206,9 @@ class ParserDocblock
     }
     /**
      * It gets the alias of a property
-     * 
+     *
      * @param \ReflectionProperty property The property to be processed
-     * 
+     *
      * @return string The alias of the property.
      */
     private function getAlias(\ReflectionProperty $property): string
