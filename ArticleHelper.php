@@ -9,6 +9,9 @@ use Liip\ImagineBundle\Imagine\Filter\FilterManager;
 use TOC\MarkupFixer;
 use TOC\TocGenerator;
 use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Bridge\Monolog\Logger as MonologLogger;
+use App\Service\base\LoggerTrait as logger;
+use Psr\Log\LoggerAwareTrait;
 
 class ArticleHelper
 {
@@ -135,7 +138,12 @@ class ArticleHelper
                 $file = $node->getAttribute('data-src')[0] == '/' ? substr($node->getAttribute('data-src'), 1) : $node->getAttribute('data-src');
                 //on suprrime l'url de l'image
                 $imgClean = explode('uploads/', $file)[1];
-                $width = getimagesize('/app/public/uploads/' . $imgClean)[0];
+                // if (!\file_exists('/app/public/uploads/' . $imgClean)) {
+                //     $imgClean = urldecode($imgClean);
+                // }
+                if (file_exists('/app/public/uploads/' . $imgClean)) {
+                    $width = getimagesize('/app/public/uploads/' . $imgClean)[0];
+                }
                 // on vérifie que l'on est dans le cas d'un image chargée par l'utilisateur
                 if (strpos($src, '/uploads') !== false) {
                     //si on a un data-size on le récupère
