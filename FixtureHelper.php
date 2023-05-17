@@ -5,28 +5,25 @@ namespace App\Service\base;
 use Faker\Factory;
 use WW\Faker\Provider\Picture;
 use App\Service\base\ToolsHelper;
+use Symfony\Component\DomCrawler\Crawler;
+use Symfony\Component\HttpFoundation\Request;
+use Goutte\Client;
 
 class FixtureHelper
 {
-
-
-
-
-
-
     /**
      * This PHP function generates random data based on the input field type.
-     * 
+     *
      * @param string image,youtube,phrase,float,icon,texte,texte_mark
      * @param lang The language in which the generated data should be returned. It has a default value
      * of 'fr_FR' if not specified.
-     * 
+     *
      * @return different values depending on the value of the `` parameter. If `` is
      * 'image', it returns a URL to a randomly generated image. If it is 'youtube', it returns a URL to
      * a YouTube video. If it is 'phrase', it returns a random text string. If it is 'float', it
      * returns a random float number. If it is
      */
-    static public function generate(string $champ, $lang = 'fr_FR')
+    public static function generate(string $champ, $lang = 'fr_FR')
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
@@ -59,13 +56,52 @@ class FixtureHelper
             case 'article':
                 return ToolsHelper::wikipedia_article_random();
                 break;
+            case 'adresse':
+                //on prend une adresse au hasard dans la liste des adresses par curl
+                $curl = curl_init();
+                curl_setopt($curl, CURLOPT_URL, 'https://api-adresse.data.gouv.fr/search/?q=rue&limit=50');
+                curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+                $result = curl_exec($curl);
+                curl_close($curl);
+                $result = json_decode($result);
+                return $result->features[rand(0, 49)]->properties;
+                break;
+            case 'immobilier':
+                //srapping pour récupérer une annonce immobilière au hasard
+                $client = new Client();
+                $crawler = $client->request('GET', 'https://www.immoweb.be/fr/recherche/maison/a-vendre');
+                $annonces = $crawler->filter('.card--result__title');
+                $annonce = $annonces->eq(rand(0, $annonces->count() - 1));
+                $annonce->filter('a')->attr('href');
+                $crawler = $client->request('GET', $annonce->filter('a')->attr('href'));
+                $description = $crawler->filter('.classified__description')->text();
+                return $description;
+                break;
             default:
                 return null;
                 break;
         }
     }
 
-
+    static function fromCrud($entity, $field)
+    {
+        $doc = new ParserDocblock($entity);
+        $options = $doc->getOptions()[$field];
+        switch ($doc->getSelect($field)) {
+            case 'choice':
+                $array = $options['options'];
+                if (isset($options['opt']) && isset($options['opt']['multiple']) && $options['opt']['multiple'] == true) {
+                    $nbrRandom = rand(0, count($array) - 1);
+                    for ($i = 0; $i < $nbrRandom; $i++) {
+                        $array[] = $array[rand(0, count($array) - 1)];
+                    }
+                    return $array;
+                } else {
+                    return $array[rand(0, count($array) - 1)];
+                }
+                break;
+        }
+    }
 
 
 
@@ -77,7 +113,7 @@ class FixtureHelper
      * @param nombre_a_creer An array of the number of blocks to create for each template.
      * @param valeurs An array of values to be inserted.
      */
-    static public function add_valeurs($temppage, $template, $nombre_a_creer = [], $valeurs = [])
+    public static function add_valeurs($temppage, $template, $nombre_a_creer = [], $valeurs = [])
     {
         $numvaleurs = 0;
         /* ------------------- pour utiliser les images de picsum ------------------- */
@@ -122,7 +158,7 @@ class FixtureHelper
      *
      * @return The factory returns an instance of the class it was called on.
      */
-    static public function createpage(string $nompage, array $templates, array $maxi = [6], bool $article = false, Temppage $parent = null)
+    public static function createpage(string $nompage, array $templates, array $maxi = [6], bool $article = false, Temppage $parent = null)
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create();
