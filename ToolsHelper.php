@@ -103,7 +103,7 @@ class ToolsHelper
         $doc = new ParserDocblock($entity);
         $IDOptions = $doc->getOptions()['id'];
         //si on a pas de search définis dans id
-        if ($search = array_key_first($IDOptions['search'])) {
+        if (isset($IDOptions['search']) && $search = array_key_first($IDOptions['search'])) {
             $clean = trim(str_replace(["'","[","]"], "", $search));
             return $clean;
         }
