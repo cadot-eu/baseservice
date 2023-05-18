@@ -10,7 +10,7 @@ class IpHelper
     private $httpClient;
     /**
      * The constructor function is used to create a new instance of the class
-     * 
+     *
      * @param HttpClientInterface httpClient This is the HttpClientInterface that we will use to make
      * requests to the API.
      */
@@ -20,7 +20,7 @@ class IpHelper
     }
 
     /* Getting the user IP address. */
-    static public function getUserIP()
+    public static function getUserIP()
     {
 
         if (isset($_SERVER['HTTP_CLIENT_IP'])) {
@@ -33,22 +33,23 @@ class IpHelper
     }
     /**
      * It returns the IP address of the server
-     * 
+     *
      * @return The IP address of the server.
      */
     public function getIp()
     {
-
+        //get real ip
         return $this->httpClient->request('GET', 'https://ipecho.net/plain')->getContent();
     }
     /**
      * It makes a GET request to the ip-api.com API and returns the response as an array
-     * 
+     *
      * @return An array of information about the user's IP address.
      */
     public function getInformations()
     {
-        $response = $this->httpClient->request('GET', 'http://ip-api.com/json/')->getContent();
-        return json_decode($response, true);
+        $ip = $this->getIp();
+        $response = $this->httpClient->request('GET', 'http://ip-api.com/json/' . $ip)->toArray();
+        return $response;
     }
 }
