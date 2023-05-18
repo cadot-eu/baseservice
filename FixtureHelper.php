@@ -91,11 +91,12 @@ class FixtureHelper
             case 'choice':
                 $array = $options['options'];
                 if (isset($options['opt']) && isset($options['opt']['multiple']) && $options['opt']['multiple'] == true) {
-                    $nbrRandom = rand(0, count($array) - 1);
-                    for ($i = 0; $i < $nbrRandom; $i++) {
-                        $array[] = $array[rand(0, count($array) - 1)];
+                    $size = \count($array) > 5 ? 5 : \count($array);
+                    $resarray = [];
+                    for ($i = 0; $i < \rand(0, $size); $i++) {
+                        $resarray[] = $array[\rand(0, \count($array) - 1)];
                     }
-                    return $array;
+                    return $resarray;
                 } else {
                     return $array[rand(0, count($array) - 1)];
                 }
