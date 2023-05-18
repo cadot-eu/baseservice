@@ -99,6 +99,14 @@ class ToolsHelper
         } else {
             $ordre = 'a.vues';
         }
+        //on regarde si on a mis search dans les annotations
+        $doc = new ParserDocblock($entity);
+        $IDOptions = $doc->getOptions()['id'];
+        //si on a pas de search définis dans id
+        if ($search = array_key_first($IDOptions['search'])) {
+            $clean = trim(str_replace(["'","[","]"], "", $search));
+            return $clean;
+        }
         $champs = [];
         foreach ($reflexion->getProperties() as $propertie) {
             if (
