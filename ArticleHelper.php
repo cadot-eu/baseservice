@@ -334,4 +334,16 @@ class ArticleHelper
 
         return $crawler->html();
     }
+    public static function convertimgtoclickable($texte)
+    {
+        $crawler = new Crawler($texte);
+        foreach ($crawler->filter('img') as $node) {
+            if ($node->parentNode->nodeName != 'a') {
+                $src = $node->getAttribute('src');
+                $node->setAttribute('data-controller', 'base--bigpicture');
+                $node->setAttribute('data-base--bigpicture-options-value', '{"imgSrc": "' . $src . '"}');
+            }
+        }
+        return $crawler->html();
+    }
 }
