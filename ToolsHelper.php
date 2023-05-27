@@ -103,7 +103,7 @@ class ToolsHelper
         //on regarde si on a mis search dans les annotations
         $doc = new ParserDocblock($entity);
         $IDOptions = $doc->getOptions()['id'];
-        //si on a pas de search définis dans id
+        //si on a search dans id
         if (isset($IDOptions['search']) && $search = array_key_first($IDOptions['search'])) {
             $clean = trim(str_replace(["'","[","]"], "", $search));
             return $clean;
@@ -111,7 +111,7 @@ class ToolsHelper
         $champs = [];
         foreach ($reflexion->getProperties() as $propertie) {
             if (
-                in_array($propertie->getName(), ['titre', 'description', 'texte', 'article', 'name', 'reponse', 'nom', 'explication',])
+                !in_array($propertie->getName(), ['updatedAt','createdAt','deletedAt','slug'])
             ) {
                 $champs[] = $propertie->getName();
             }
