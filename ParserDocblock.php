@@ -42,7 +42,7 @@ class ParserDocblock
     {
         $this->Entity = ucfirst($string);
         $class = 'App\Entity\\' . $this->Entity;
-        $this->reflexion = new \ReflectionClass(new $class());
+        $this->reflexion = new \ReflectionClass($class);
     }
 
     /**
