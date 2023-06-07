@@ -119,11 +119,13 @@ class FixtureHelper
         if (!empty($data)) {
             $lat = $data[0]['lat'];
             $lon = $data[0]['lon'];
-            $reverse_url = "https://nominatim.cadot.eu/reverse?lat=$lat&lon=$lon&format=jsonv2";
+
+            $reverse_url =  "https://overpass-api.de/api/interpreter?data=[out:json];node(around:10000,$lat,$lon)[amenity=university];out;";
             $reverse_response = file_get_contents($reverse_url);
             $reverse_data = json_decode($reverse_response, true);
 
             if (!empty($reverse_data['address'])) {
+                dd($reverse_data['address']);
                 if (strpos(strtolower($reverse_data['address']), 'university') !== false) {
                     return true;
                 } else {
