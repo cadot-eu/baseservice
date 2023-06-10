@@ -220,4 +220,20 @@ class ParserDocblock
         }
         return '';
     }
+      /**
+     * It gets the select of a property
+     *
+     * @param \ReflectionProperty property The property to be processed
+     *
+     * @return string The select of the property.
+     */
+    public function propertyExist($name)
+    {
+        foreach ($this->reflexion->getTraits() as $trait) {
+            if ($trait->hasProperty($name)) {
+                return true;
+            }
+        }
+        return $this->reflexion->hasProperty($name);
+    }
 }
