@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['adresse','simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass','importance'])
+    public function __construct(string $entity = '', array $baseAlias = ['adresse','simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass','importance','stars'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
@@ -89,9 +89,22 @@ class ParserDocblock
     {
         return $this->selects[$name];
     }
-    public function getOptions(): array
+    public function getOptions($field = null, $name = null): ?array
     {
-        return $this->options;
+        if ($field) {
+            if ($name) {
+                if (isset($this->options[$field][$name])) {
+                    return $this->options[$field][$name];
+                } else {
+                    return null;
+                }
+            } elseif (isset($this->options[$field])) {
+                return $this->options[$field];
+            }
+            return null;
+        } else {
+            return $this->options;
+        }
     }
     public function getType(string $name): string
     {
