@@ -8,6 +8,9 @@ use App\Service\base\ToolsHelper;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
 use Goutte\Client;
+use Symfony\Bundle\FrameworkBundle\Console\Descriptor\Descriptor;
+use App\Service\base\FixtureHelper;
+use LanguageDetector\LanguageDetector;
 
 class FixtureHelper
 {
@@ -23,7 +26,7 @@ class FixtureHelper
      * a YouTube video. If it is 'phrase', it returns a random text string. If it is 'float', it
      * returns a random float number. If it is
      */
-    public static function generate(string $champ, $lang = 'fr_FR')
+    public static function generate(string $champ, $lang = 'fr_FR', $options = [])
     {
         /* ------------------- pour utiliser les images de picsum ------------------- */
         $faker = Factory::create($lang);
@@ -34,55 +37,70 @@ class FixtureHelper
         switch ($champ) {
             case 'image':
                 return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
-                break;
+            break;
             case 'youtube':
                 return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-                break;
+            break;
             case 'phrase':
                 return $faker->text(10);
-                break;
+            break;
             case 'float':
                 return $faker->randomFloat(2);
-                break;
+            break;
             case 'texte':
                 return $faker->text();
-                break;
+            break;
             case 'texte_mark':
                 return $faker->text(20) . '<mark>' . $faker->colorName() . '</mark>' . $faker->text(20);
-                break;
+            break;
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
-                break;
+            break;
             case 'article':
                 return ToolsHelper::wikipedia_article_random();
-                break;
+            break;
             case 'adresse':
+                if (isset($options['q'])) {
+                    $q = urlencode($options['q']);
+                } else {
+                    $q = "rue";
+                }
                 //on prend une adresse au hasard dans la liste des adresses par curl
                 $curl = curl_init();
-                curl_setopt($curl, CURLOPT_URL, 'https://api-adresse.data.gouv.fr/search/?q=rue&limit=50');
+                curl_setopt($curl, CURLOPT_URL, "https://api-adresse.data.gouv.fr/search/?q=$q&limit=50");
                 curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
                 $result = curl_exec($curl);
                 curl_close($curl);
                 $result = json_decode($result);
-                return $result->features[rand(0, 49)]->properties;
+                return $result->features[rand(0, 49)];
                 break;
             case 'immobilier':
                 //srapping pour récupérer une annonce immobilière au hasard
-                $client = new Client();
-                $crawler = $client->request('GET', 'https://www.immoweb.be/fr/recherche/maison/a-vendre');
-                $annonces = $crawler->filter('.card--result__title');
-                $annonce = $annonces->eq(rand(0, $annonces->count() - 1));
-                $annonce->filter('a')->attr('href');
-                $crawler = $client->request('GET', $annonce->filter('a')->attr('href'));
-                $description = $crawler->filter('.classified__description')->text();
-                return $description;
+                return FixtureHelper::generateImmobilier();
                 break;
             default:
                 return null;
                 break;
         }
     }
+    public static function generateImmobilier()
+    {
+        $client = new Client();
+        $crawler = $client->request('GET', 'https://www.immoweb.be/fr/recherche/maison/a-vendre');
+        $annonces = $crawler->filter('.card--result__title');
+        $annonce = $annonces->eq(rand(0, $annonces->count() - 1));
+        $annonce->filter('a')->attr('href');
+        $crawler = $client->request('GET', $annonce->filter('a')->attr('href'));
+        $description = $crawler->filter('.classified__description')->text();
+        $detector = new LanguageDetector();
+        $language = $detector->evaluate($description)->getLanguage();
 
+        if ($language != 'fr') {
+            return FixtureHelper::generateImmobilier();
+        } else {
+            return $description;
+        }
+    }
     static function exEtudiantsInTown($city)
     {
         $curl = curl_init();
@@ -120,9 +138,9 @@ class FixtureHelper
             $lat = $data[0]['lat'];
             $lon = $data[0]['lon'];
 
-            $reverse_url =  "https://overpass-api.de/api/interpreter?data=[out:json];node(around:10000,$lat,$lon)[amenity=university];out;";
-            $reverse_response = file_get_contents($reverse_url);
-            $reverse_data = json_decode($reverse_response, true);
+            // $reverse_url =  "https://overpass-api.de/api/interpreter?data=[out:json];node(around:10000,$lat,$lon)[amenity=university];out;";
+            // $reverse_response = file_get_contents($reverse_url);
+            // $reverse_data = json_decode($reverse_response, true);
 
             if (!empty($reverse_data['address'])) {
                 dd($reverse_data['address']);
