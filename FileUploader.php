@@ -84,10 +84,9 @@ class FileUploader
     }
     static public function cleanname($string)
     {
-        //return $string;
         $info = pathinfo($string);
-        $point = strrpos($info['filename'], ".");
+        $point = strpos($info['filename'],'.')?strrpos($info['filename'], "."):strlen($info['filename']);
         $filename = substr($info['filename'], 0, $point);
-        return 'dd' . $filename; // . '.' . $info['extension'];
+        return  $filename . '.' . $info['extension'];
     }
 }

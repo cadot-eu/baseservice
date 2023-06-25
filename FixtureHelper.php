@@ -36,7 +36,8 @@ class FixtureHelper
         $icones = json_decode(file_get_contents('/app/src/Twig/base/gists/list.json'));
         switch ($champ) {
             case 'image':
-                return substr($faker->picture('public/uploads/fixtures/', 640, 480), strlen('public/'));
+                @mkdir('/app/public/uploads/fixtures', 0777, true);
+                return substr($faker->picture('/app/public/uploads/fixtures/', 640, 480), strlen('/app/public/'));
             break;
             case 'youtube':
                 return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
