@@ -200,6 +200,8 @@ class ArticleHelper
     public static function removeFigureInclusFigure($texte)
     {
         $crawler = new Crawler($texte);
+        if($crawler->count() > 0)
+        {
         foreach ($crawler->filter('figure') as $node) {
             //si on a pas une class table
             if (strpos($node->getAttribute('class'), 'table') !== false) {
@@ -212,12 +214,17 @@ class ArticleHelper
             }
         }
         return $crawler->filter('body')->html();
+    } else {
+        return $texte;
+    }
     }
 
     //fonction qui supprime les racines des liens des href
     public static function removeRoot($texte)
     {
         $crawler = new Crawler($texte);
+        if($crawler->count() > 0)
+        {
         foreach ($crawler->filter('a') as $node) {
             //@var node $node
             $href = $node->getAttribute('href');
@@ -227,6 +234,9 @@ class ArticleHelper
             }
         }
         return $crawler->filter('body')->html();
+    } else {
+        return $texte;
+    }
     }
     public static function datasrcToSrc($texte)
     {
@@ -259,84 +269,46 @@ class ArticleHelper
                 $closest = array_reduce(array_keys($filtres), function ($prev, $curr) use ($filtres, $width) {
                     return (abs($filtres[$curr] - $width) < abs($filtres[$prev] - $width)) ? $curr : $prev;
                 }, array_keys($filtres)[0]);
-                dump($closest);
-                //$node->setAttribute('src', $imagineCacheManager->getBrowserPath($url, $closest));
             }
-
-            // $child[0]->setAttribute('style', $node->getAttribute('liip') . ' ' . $child[0]->getAttribute('style'));
-            // $child[0]->setAttribute('class', $node->getAttribute('class') . ' ' . $child[0]->getAttribute('class'));
-            // $node->removeAttribute('style');
-            // $node->removeAttribute('class');
         }
         return ($crawler->filter('body')->html());      //on vérifie aussi les img
-        // foreach ($crawler->filter('img') as $node) {
-        //  $src = $node->getAttribute('src');
-        //  foreach (explode(' ', $node->getAttribute('style')) as $style) {
-        //      if (strpos($style, 'width') !== false) {
-        //          $width = explode(':', $style)[1];
-        //          $liip = str_replace(
-        //              [
-        //                  ';',
-        //                  '%',
-        //                  '0',
-        //                  '1',
-        //                  '2',
-        //                  '3',
-        //                  '4',
-        //                  '5',
-        //                  '6',
-        //                  '7',
-        //                  '8',
-        //                  '9',
-        //                  '.',
-        //              ],
-        //              '',
-        //              $width
-        //          );
-        //          $img = 'uploads/' . explode('uploads/', $src)[1];
-        //          if ($liip) {
-        //              dump('width:' . $width);
-        //              $node->setAttribute(
-        //                  'style',
-        //                  str_replace(
-        //                      'width:' . $width,
-        //                      '',
-        //                      $node->getAttribute('style')
-        //                  )
-        //              );
-        //              $resolvedPath = $imagineCacheManager->getBrowserPath(
-        //                  $img,
-        //                  $liip
-        //              );
-        //              $node->setAttribute('src', $resolvedPath);
-        //              //dump($resolvedPath);
-        //          }
-        //          //dump($resolvedPath);
-        //      }
-        //  }
-        // }
         return $crawler->html();
     }
     public static function addTableClass($texte, $class = "table table-striped table-bordered align-middle text-center")
     {
         $crawler = new Crawler($texte);
+        if($crawler->count() > 0)
+        {
         foreach ($crawler->filter('table') as $node) {
             $node->setAttribute('class', $class);
         }
         return $crawler->html();
+        }
+        else
+        {
+            return $texte;
+        }
     }
     public static function rmtableStyle($texte)
     {
         $crawler = new Crawler($texte);
+        if($crawler->count() > 0)
+        {
         foreach ($crawler->filter('td,th,td') as $node) {
             $node->removeAttribute('style');
         }
-
         return $crawler->html();
+        }
+        else
+        {
+            return $texte;
+        }
     }
     public static function convertimgtoclickable($texte)
     {
         $crawler = new Crawler($texte);
+        if($crawler->count() > 0)
+        {
         foreach ($crawler->filter('img') as $node) {
             if ($node->parentNode->nodeName != 'a') {
                 $src = $node->getAttribute('src');
@@ -345,5 +317,10 @@ class ArticleHelper
             }
         }
         return $crawler->html();
+        }
+        else
+        {
+            return $texte;
+        }
     }
 }
