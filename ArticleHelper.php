@@ -131,7 +131,7 @@ class ArticleHelper
                 $src = $node->getAttribute('src');
                 $node->setAttribute('data-src', $src);
                 $node->removeAttribute('src');
-                $node->setAttribute('class', 'img-fluid');
+                $node->setAttribute('class', 'img-fluid lazy');
                 $lien = 'uploads/' . explode('uploads/', $src)[1];
                 //on donne la taille de l'image
                 //on récupère la largeur de l'image
