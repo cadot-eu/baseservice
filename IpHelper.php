@@ -55,7 +55,7 @@ class IpHelper
     return new Response($response->getBody()->getContents());
     }
 //get ip synchrone
-    public static function getIp()
+    public function getIp()
     {
         $ip = $this->httpClient->request('GET', 'https://ipecho.net/plain')->getContent();
         
