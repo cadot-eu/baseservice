@@ -4,8 +4,6 @@ namespace App\Service\base;
 
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
-use GuzzleHttp\Client;
-use GuzzleHttp\Promise;
 
 class IpHelper
 {
@@ -33,26 +31,6 @@ class IpHelper
             return (isset($_SERVER['REMOTE_ADDR']) ? $_SERVER['REMOTE_ADDR'] : '');
         }
     }
-    /**
-     * It returns the IP address of the server
-     *
-     * @return The IP address of the server.
-     */
-    public function getIpAsynchrone()
-    {
-        // get real ip asynchronously
-    $client = new Client();
-    $url = 'https://ipecho.net/plain';
-
-    $promise = $client->getAsync($url);
-    $response = $promise->wait();
-
-    if ($response->getStatusCode() !== 200) {
-        // Gérer les erreurs de requête ici
-        return new Response('Erreur de requête externe', 500);
-    }
-
-    return new Response($response->getBody()->getContents());
     }
 //get ip synchrone
     public function getIp()
