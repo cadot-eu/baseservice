@@ -28,6 +28,7 @@ class ParserDocblock
             $this->alias[$name] = $alias = $this->getAlias($property);
             $this->types[$name] = $type = $this->findType($property);
             //on prend le tableau d'alias sinon le type
+           
             $this->selects[$name] = count($alias)>0 ? $alias : [$type];
             $this->properties[$name] = $property;
         }
