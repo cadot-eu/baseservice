@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['adresse','simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass','importance','stars','nombre'])
+    public function __construct(string $entity = '', array $baseAlias = ['integer','adresse','simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass','importance','stars','nombre'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
@@ -27,8 +27,8 @@ class ParserDocblock
             $this->options[$name] = $this->parseOptions($property);
             $this->alias[$name] = $alias = $this->getAlias($property);
             $this->types[$name] = $type = $this->findType($property);
-            //on prend l'alias en priorité
-            $this->selects[$name] = $alias != '' ? $alias : $type;
+            //on prend le tableau d'alias sinon le type
+            $this->selects[$name] = count($alias)>0 ? $alias : [$type];
             $this->properties[$name] = $property;
         }
     }
@@ -85,7 +85,7 @@ class ParserDocblock
     {
         return $this->properties[$name];
     }
-    public function getSelect($name): string
+    public function getSelect($name): array
     {
         return $this->selects[$name];
     }
@@ -218,20 +218,29 @@ class ParserDocblock
         return $property->getName();
     }
     /**
-     * It gets the alias of a property
+     * It returns the alias of the property
      *
-     * @param \ReflectionProperty property The property to be processed
+     * @param \ReflectionProperty property The property to be analyzed
      *
-     * @return string The alias of the property.
+     * @return array The alias of the property.
      */
-    private function getAlias(\ReflectionProperty $property): string
+    private function getAlias(\ReflectionProperty $property): array
     {
         $docs = $property->getDocComment();
         $tab = explode("\n", $docs);
-        if (isset($tab[1]) && strpos($tab[1], ':') === false && in_array($this->clean($tab[1]), $this->baseAlias)) {
-            return $this->clean($tab[1]);
+        $restab = [];
+        //on boucle sur les $tab 
+        //on supprime le tab[0]
+        unset($tab[0]);
+        foreach($tab as $num => $item){
+        if (isset($tab[$num]) && strpos($tab[$num], ':') === false && in_array($this->clean($tab[$num]), $this->baseAlias)) {
+            $restab[]=$this->clean($tab[$num]);
         }
-        return '';
+        else { //on quite la boucle
+           break;
+        }
+    }
+        return $restab;
     }
       /**
      * It gets the select of a property
