@@ -28,4 +28,8 @@ class FileHelper
             rmdir($dir);
         }
     }
+    static public function extension($string)
+    {
+        return pathinfo($string, PATHINFO_EXTENSION);
+    }
 }

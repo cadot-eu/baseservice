@@ -18,7 +18,7 @@ class ParserDocblock
         $baseAlias;
 
 
-    public function __construct(string $entity = '', array $baseAlias = ['integer','adresse','simple', 'simplelanguage', 'vide', 'normal','full','annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image','video', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass','importance','stars','nombre'])
+    public function __construct(string $entity = '', array $baseAlias = ['integer', 'adresse', 'simple', 'simplelanguage', 'vide', 'normal', 'full', 'annonce', 'choice', 'choiceenplace', 'onechoiceenplace', 'entity', 'collection', 'color', 'email', 'password', 'hidden', 'hiddenroot', 'invisible', 'readonlyroot', 'image', 'video', 'fichier', 'money', 'telephone', 'siret', 'array', 'json', 'order', 'search', 'select', 'string', 'drapeau', 'pass', 'importance', 'stars', 'nombre'])
     {
         $this->setEntity($entity);
         $this->baseAlias = $baseAlias;
@@ -28,8 +28,8 @@ class ParserDocblock
             $this->alias[$name] = $alias = $this->getAlias($property);
             $this->types[$name] = $type = $this->findType($property);
             //on prend le tableau d'alias sinon le type
-           
-            $this->selects[$name] = count($alias)>0 ? $alias : [$type];
+
+            $this->selects[$name] = count($alias) > 0 ? $alias : [$type];
             $this->properties[$name] = $property;
         }
     }
@@ -197,7 +197,7 @@ class ParserDocblock
     }
 
     /**
-     * It removes all the characters in the second parameter from the first parameter
+     * retire les caractères avant qui sont des \n des * des espaces
      *
      * @param string The string to be cleaned.
      *
@@ -233,17 +233,16 @@ class ParserDocblock
         //on boucle sur les $tab 
         //on supprime le tab[0]
         unset($tab[0]);
-        foreach($tab as $num => $item){
-        if (isset($tab[$num]) && strpos($tab[$num], ':') === false && in_array($this->clean($tab[$num]), $this->baseAlias)) {
-            $restab[]=$this->clean($tab[$num]);
+        foreach ($tab as $num => $item) {
+            if (isset($tab[$num]) && strpos($tab[$num], ':') === false && in_array($this->clean($tab[$num]), $this->baseAlias)) {
+                $restab[] = $this->clean($tab[$num]);
+            } else { //on quite la boucle
+                break;
+            }
         }
-        else { //on quite la boucle
-           break;
-        }
-    }
         return $restab;
     }
-      /**
+    /**
      * It gets the select of a property
      *
      * @param \ReflectionProperty property The property to be processed

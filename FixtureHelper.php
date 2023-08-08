@@ -7,10 +7,13 @@ use WW\Faker\Provider\Picture;
 use App\Service\base\ToolsHelper;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpFoundation\Request;
-use Goutte\Client;
 use Symfony\Bundle\FrameworkBundle\Console\Descriptor\Descriptor;
 use App\Service\base\FixtureHelper;
 use LanguageDetector\LanguageDetector;
+use Faker\Provider\Youtube;
+use App\Service\base\FileHelper;
+use Symfony\Component\Panther\DomCrawler\Crawler as DomCrawlerCrawler;
+use Goutte\Client;
 
 class FixtureHelper
 {
@@ -38,28 +41,38 @@ class FixtureHelper
             case 'image':
                 @mkdir('/app/public/uploads/fixtures', 0777, true);
                 return substr($faker->picture('/app/public/uploads/fixtures/', 640, 480), strlen('/app/public/'));
-            break;
+                break;
+            case 'video':
+                @mkdir('/app/public/uploads/fixtures', 0777, true);
+                //on télécharge la vidéo de l'url de https://sample-videos.com/ 
+                // vidéos de 1 Mo en plusieurs formats
+                $videos = ['https://sample-videos.com/video123/mp4/720/big_buck_bunny_720p_1mb.mp4', 'https://sample-videos.com/video123/mkv/720/big_buck_bunny_720p_1mb.mkv', 'https://sample-videos.com/video123/3gp/240/big_buck_bunny_240p_1mb.3gp'];
+                $video = $videos[rand(0, count($videos) - 1)];
+                file_put_contents($name = '/app/public/uploads/fixtures/video' . \uniqid() . '.' . FileHelper::extension($video), file_get_contents($video));
+                return substr($name, strlen('/app/public/'));
+                break;
+
             case 'youtube':
                 return $faker->randomElement(['https://www.youtube.com/embed/zpOULjyy-n8?rel=0']);
-            break;
+                break;
             case 'phrase':
                 return $faker->text(10);
-            break;
+                break;
             case 'float':
                 return $faker->randomFloat(2);
-            break;
+                break;
             case 'texte':
                 return $faker->text();
-            break;
+                break;
             case 'texte_mark':
                 return $faker->text(20) . '<mark>' . $faker->colorName() . '</mark>' . $faker->text(20);
-            break;
+                break;
             case 'icone':
                 return 'bi-' . $faker->randomElement($icones);
-            break;
+                break;
             case 'article':
                 return ToolsHelper::wikipedia_article_random();
-            break;
+                break;
             case 'adresse':
                 if (isset($options['q'])) {
                     $q = urlencode($options['q']);
@@ -162,7 +175,7 @@ class FixtureHelper
     {
         $doc = new ParserDocblock($entity);
         $options = $doc->getOptions()[$field];
-        switch ($doc->getSelect($field)) {
+        switch ($doc->getSelect($field)[0]) { //on prend que le premier alias
             case 'choice':
                 $array = $options['options'];
                 if (isset($options['opt']) && isset($options['opt']['multiple']) && $options['opt']['multiple'] == true) {
