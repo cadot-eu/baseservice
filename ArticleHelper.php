@@ -252,7 +252,6 @@ class ArticleHelper
                 //en fonction de la taille de l'image on met un filtre
                 //on découpe le style pour récupérer la largeur
                 $width = trim(StringHelper::chaine_extract($node->getAttribute('style'), 'width:', 'px')) ?: 500;
-                dump($width);
                 //on récupère les filtres de liip
                 $filters = $filterLoader->getFilterConfiguration()->all();
                 $filtres = [];
