@@ -200,49 +200,47 @@ class ArticleHelper
     public static function removeFigureInclusFigure($texte)
     {
         $crawler = new Crawler($texte);
-        if($crawler->count() > 0)
-        {
-        foreach ($crawler->filter('figure') as $node) {
-            //si on a pas une class table
-            if (strpos($node->getAttribute('class'), 'table') !== false) {
-                //on regarde tous les enfants et on supprime les figures enfants
-                foreach ($node->childNodes as $child) {
-                    if ($child->nodeName == 'figure') {
-                        $node->removeChild($child);
+        if ($crawler->count() > 0) {
+            foreach ($crawler->filter('figure') as $node) {
+                //si on a pas une class table
+                if (strpos($node->getAttribute('class'), 'table') !== false) {
+                    //on regarde tous les enfants et on supprime les figures enfants
+                    foreach ($node->childNodes as $child) {
+                        if ($child->nodeName == 'figure') {
+                            $node->removeChild($child);
+                        }
                     }
                 }
             }
+            return $crawler->filter('body')->html();
+        } else {
+            return $texte;
         }
-        return $crawler->filter('body')->html();
-    } else {
-        return $texte;
-    }
     }
 
     //fonction qui supprime les racines des liens des href
     public static function removeRoot($texte)
     {
         $crawler = new Crawler($texte);
-        if($crawler->count() > 0)
-        {
-        foreach ($crawler->filter('a') as $node) {
-            //@var node $node
-            $href = $node->getAttribute('href');
+        if ($crawler->count() > 0) {
+            foreach ($crawler->filter('a') as $node) {
+                //@var node $node
+                $href = $node->getAttribute('href');
 
-            if (strpos($href, 'http') !== false && strpos($href, 'picbleu.fr') !== false) {
-                $node->setAttribute('href', substr($href, strpos($href, '/', 8)));
+                if (strpos($href, 'http') !== false && strpos($href, 'picbleu.fr') !== false) {
+                    $node->setAttribute('href', substr($href, strpos($href, '/', 8)));
+                }
             }
+            return $crawler->filter('body')->html();
+        } else {
+            return $texte;
         }
-        return $crawler->filter('body')->html();
-    } else {
-        return $texte;
-    }
     }
     public static function datasrcToSrc($texte)
     {
         return str_replace('data-src', 'src', $texte);
     }
-    public static function exaddFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
+    public static function addFilterLiip($texte, CacheManager $imagineCacheManager, FilterManager $filterLoader)
     {
         //on ajoute un filtre en fonction du champ liip ou au pire on met moyen
         $crawler = new Crawler($texte);
@@ -277,49 +275,40 @@ class ArticleHelper
     public static function addTableClass($texte, $class = "table table-striped table-bordered align-middle text-center")
     {
         $crawler = new Crawler($texte);
-        if($crawler->count() > 0)
-        {
-        foreach ($crawler->filter('table') as $node) {
-            $node->setAttribute('class', $class);
-        }
-        return $crawler->html();
-        }
-        else
-        {
+        if ($crawler->count() > 0) {
+            foreach ($crawler->filter('table') as $node) {
+                $node->setAttribute('class', $class);
+            }
+            return $crawler->html();
+        } else {
             return $texte;
         }
     }
     public static function rmtableStyle($texte)
     {
         $crawler = new Crawler($texte);
-        if($crawler->count() > 0)
-        {
-        foreach ($crawler->filter('td,th,td') as $node) {
-            $node->removeAttribute('style');
-        }
-        return $crawler->html();
-        }
-        else
-        {
+        if ($crawler->count() > 0) {
+            foreach ($crawler->filter('td,th,td') as $node) {
+                $node->removeAttribute('style');
+            }
+            return $crawler->html();
+        } else {
             return $texte;
         }
     }
     public static function convertimgtoclickable($texte)
     {
         $crawler = new Crawler($texte);
-        if($crawler->count() > 0)
-        {
-        foreach ($crawler->filter('img') as $node) {
-            if ($node->parentNode->nodeName != 'a') {
-                $src = $node->getAttribute('src');
-                $node->setAttribute('data-controller', 'base--bigpicture');
-                $node->setAttribute('data-base--bigpicture-options-value', '{"imgSrc": "' . $src . '"}');
+        if ($crawler->count() > 0) {
+            foreach ($crawler->filter('img') as $node) {
+                if ($node->parentNode->nodeName != 'a') {
+                    $src = $node->getAttribute('src');
+                    $node->setAttribute('data-controller', 'base--bigpicture');
+                    $node->setAttribute('data-base--bigpicture-options-value', '{"imgSrc": "' . $src . '"}');
+                }
             }
-        }
-        return $crawler->html();
-        }
-        else
-        {
+            return $crawler->html();
+        } else {
             return $texte;
         }
     }
