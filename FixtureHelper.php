@@ -118,7 +118,7 @@ class FixtureHelper
     static function exEtudiantsInTown($city)
     {
         $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, "https://nominatim.cadot.eu//search?q=" . urlencode($city) . "&format=json&limit=1");
+        curl_setopt($curl, CURLOPT_URL, "https://nominatim.vazzy.org//search?q=" . urlencode($city) . "&format=json&limit=1");
         curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
         $response = curl_exec($curl);
         curl_close($curl);
@@ -144,7 +144,7 @@ class FixtureHelper
 
     static function EtudiantsInTown($town)
     {
-        $url = "https://nominatim.cadot.eu/search?q=" . urlencode($town) . "&format=json&limit=1";
+        $url = "https://nominatim.vazzy.org/search?q=" . urlencode($town) . "&format=json&limit=1";
         $response = file_get_contents($url);
         $data = json_decode($response, true);
 
