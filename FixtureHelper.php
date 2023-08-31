@@ -13,7 +13,7 @@ use LanguageDetector\LanguageDetector;
 use Faker\Provider\Youtube;
 use App\Service\base\FileHelper;
 use Symfony\Component\Panther\DomCrawler\Crawler as DomCrawlerCrawler;
-use Goutte\Client;
+use Symfony\Component\Panther\Client;
 
 class FixtureHelper
 {
