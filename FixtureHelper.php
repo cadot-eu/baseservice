@@ -115,61 +115,7 @@ class FixtureHelper
             return $description;
         }
     }
-    static function exEtudiantsInTown($city)
-    {
-        $curl = curl_init();
-        curl_setopt($curl, CURLOPT_URL, "https://nominatim.vazzy.org//search?q=" . urlencode($city) . "&format=json&limit=1");
-        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
-        $response = curl_exec($curl);
-        curl_close($curl);
-        dd($response);
-        $data = json_decode($response, true);
-        dd($data);
-        if (!empty($data)) {
-            $lat = $data[0]['lat'];
-            $lon = $data[0]['lon'];
-            $url = "https://overpass-api.de/api/interpreter?data=[out:json];node(around:10000,$lat,$lon)[amenity=university];out;";
-            $response = file_get_contents($url);
-            $data = json_decode($response, true);
 
-            if (!empty($data['elements'])) {
-                return true;
-            } else {
-                return false;
-            }
-        } else {
-            return "no data";
-        }
-    }
-
-    static function EtudiantsInTown($town)
-    {
-        $url = "https://nominatim.vazzy.org/search?q=" . urlencode($town) . "&format=json&limit=1";
-        $response = file_get_contents($url);
-        $data = json_decode($response, true);
-
-        if (!empty($data)) {
-            $lat = $data[0]['lat'];
-            $lon = $data[0]['lon'];
-
-            // $reverse_url =  "https://overpass-api.de/api/interpreter?data=[out:json];node(around:10000,$lat,$lon)[amenity=university];out;";
-            // $reverse_response = file_get_contents($reverse_url);
-            // $reverse_data = json_decode($reverse_response, true);
-
-            if (!empty($reverse_data['address'])) {
-                dd($reverse_data['address']);
-                if (strpos(strtolower($reverse_data['address']), 'university') !== false) {
-                    return true;
-                } else {
-                    return false;
-                }
-            } else {
-                return "no data";
-            }
-        } else {
-            return "no data";
-        }
-    }
 
     static function fromCrud($entity, $field)
     {
