@@ -3,7 +3,6 @@
 namespace App\Service\base;
 
 use App\Repository\ParametresRepository;
-use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
 

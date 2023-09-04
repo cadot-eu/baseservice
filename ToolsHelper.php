@@ -2,7 +2,6 @@
 
 namespace App\Service\base;
 
-use App\Twig\base\AllExtension;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Yaml\Yaml;
 use App\Entity\Parametres;
@@ -105,13 +104,13 @@ class ToolsHelper
         $IDOptions = $doc->getOptions()['id'];
         //si on a search dans id
         if (isset($IDOptions['search']) && $search = array_key_first($IDOptions['search'])) {
-            $clean = trim(str_replace(["'","[","]"], "", $search));
+            $clean = trim(str_replace(["'", "[", "]"], "", $search));
             return $clean;
         }
         $champs = [];
         foreach ($reflexion->getProperties() as $propertie) {
             if (
-                !in_array($propertie->getName(), ['updatedAt','createdAt','deletedAt','slug'])
+                !in_array($propertie->getName(), ['updatedAt', 'createdAt', 'deletedAt', 'slug'])
             ) {
                 $champs[] = $propertie->getName();
             }
@@ -198,17 +197,17 @@ class ToolsHelper
         $repo = $em->getRepository($objetEntity);
         return $repo->find($id);
     }
-  /**
-   * This PHP function retrieves parameters from a repository that start with a given string.
-   *
-   * @param string startWith A string representing the prefix that the parameter names should start
-   * with.
-   * @param ParametresRepository parametresRepository It is an instance of the ParametresRepository
-   * class, which is used to retrieve data from a database table named "parametres". The findAll()
-   * method is called on this instance to retrieve all the records from the table.
-   *
-   * @return an array of parameters whose name starts with a given string ``.
-   */
+    /**
+     * This PHP function retrieves parameters from a repository that start with a given string.
+     *
+     * @param string startWith A string representing the prefix that the parameter names should start
+     * with.
+     * @param ParametresRepository parametresRepository It is an instance of the ParametresRepository
+     * class, which is used to retrieve data from a database table named "parametres". The findAll()
+     * method is called on this instance to retrieve all the records from the table.
+     *
+     * @return an array of parameters whose name starts with a given string ``.
+     */
     public static function getParamsStartWith(string $startWith, ParametresRepository $parametresRepository)
     {
         $params = $parametresRepository->findAll();
