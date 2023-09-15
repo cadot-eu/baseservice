@@ -230,6 +230,9 @@ class ParserDocblock
         $docs = $property->getDocComment();
         $tab = explode("\n", $docs);
         $restab = [];
+        if ($property->getName() == 'id') {
+            $restab[] = 'id';
+        }
         //on boucle sur les $tab 
         //on supprime le tab[0]
         unset($tab[0]);
