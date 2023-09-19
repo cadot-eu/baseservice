@@ -4,6 +4,7 @@ namespace App\Service\base;
 
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Dompdf\Dompdf;
+use Dompdf\Options;
 
 class dompdfHelper
 {
@@ -26,10 +27,22 @@ class dompdfHelper
         if (!$nameFichier) {
             $nameFichier = \uniqid() . '.pdf';
         }
+        $tmp = sys_get_temp_dir();
         $dompdf = new Dompdf();
+        $dompdf->setOptions(new Options([
+
+
+            'isRemoteEnabled' => true,
+            'fontDir' => $tmp,
+            'fontCache' => $tmp,
+            'tempDir' => $tmp,
+            'chroot' => $tmp
+        ]));
+        $dompdf->set_option('isFontSubsettingEnabled', true);
+        $dompdf->set_option('defaultMediaType', 'all');
         $dompdf->setPaper('A4', 'portrait');
         $dompdf->loadHtml($html);
         $dompdf->render();
-        return $dompdf->stream($nameFichier, ['Attachment' => $attachment]);
+        return $dompdf->stream($nameFichier, ['Attachment' => $attachment, 'compress' => true,]);
     }
 }
