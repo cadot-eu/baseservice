@@ -15,6 +15,7 @@ use Psr\Log\LoggerAwareTrait;
 
 class ArticleHelper
 {
+
     /**
      * It takes an article, and returns a table of contents for that article
      *
@@ -103,7 +104,7 @@ class ArticleHelper
         return $article;
     }
 
-    public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager): ?string
+    public static function imgToSrcset($texte): ?string
     {
         $redimensionnement = 0;
         //on vérifie que texte est un html
@@ -310,5 +311,101 @@ class ArticleHelper
         } else {
             return $texte;
         }
+    }
+
+    /**
+     * Calcule le temps approximatif de lecture d'une page HTML.
+     *
+     * @param string $html Le contenu HTML de la page.
+     * @param int $wordsPerMinute Le nombre moyen de mots lus par minute.
+     * @return string Le temps approximatif de lecture en minutes.
+     */
+    public static function tempsDeLecture(?string $html, int $wordsPerMinute = 200): int
+    {
+        if (empty($html)) {
+            return 0;
+        }
+        // Créer une instance du Crawler pour analyser le HTML
+        $crawler = new Crawler($html);
+        if ($crawler->count() == 0) {
+            return 0;
+        }
+        // Extraire le texte du contenu HTML
+        $text = $crawler->filter('body')->text();
+
+        // Compter le nombre de mots dans le texte
+        $wordCount = str_word_count(strip_tags($text));
+
+        // Calculer le temps approximatif de lecture en minutes
+        return ceil($wordCount / $wordsPerMinute);
+    }
+    public function getrendu($objetSelect)
+    {
+
+        $Texte = $objetSelect->getContenu();
+        if (strpos($Texte, 'øtitreø') !== false) {
+            $isTemplate = true;
+        }
+        //correction des ids pour les titres
+        $markupFixer = new MarkupFixer();
+        if ($Texte) {
+            $Texte = $markupFixer->fix($Texte);
+        }
+        // ajout d'un sommaire au début du texte si coché dans les options d'article
+        // injection d'un sommaire à la place de øsommaireø dans le texte
+        $sommaire = '<p class="fs-2">Sommaire</p>' . ArticleHelper::getSommaire($Texte, 1, 2) . '<hr>';
+        //si on a la cahe sommaire coché et si elle existe dans l'objet
+
+        if (\method_exists($objetSelect, 'getSommaire')) {
+            if ($objetSelect->getSommaire()) {
+                $Texte = $sommaire . $Texte;
+            }
+            $Texte = \str_replace('øsommaireø', $sommaire, $Texte);
+        }
+        $Texte = \str_replace('&nbsp;', ' ', $Texte);
+        //si øsommaire est dans le texte
+        $Texte = \str_replace('øsommaireø', $sommaire, $Texte);
+        $Texte = ArticleHelper::addLinkVideos($Texte);
+        //$Texte = ArticleHelper::addLinkGlossaire($Texte, $glossaireRepository);
+        $Texte = \str_replace('øtitreø', $objetSelect->getTitre(), $Texte);
+        //$Texte = ArticleHelper::imgToSrcset($Texte, $imagineCacheManager, $filtermanager);
+        $Texte = ArticleHelper::rmTableStyle($Texte);
+        $Texte = ArticleHelper::addTableClass($Texte);
+        $Texte = ArticleHelper::removeRoot($Texte);
+        $Texte = ArticleHelper::datasrcToSrc($Texte);
+        $Texte = ArticleHelper::convertimgtoclickable($Texte);
+
+
+        /* -------------------------- ajout des graphiques -------------------------- */
+        $start = 0;
+        foreach (StringHelper::extractAll($Texte, 0, '¤graphique(', ')¤') as $id) {
+            $start = strpos($Texte, '¤)', $start) + 2;
+            if ($start == false) {
+                $start = strlen($Texte);
+            }
+            $graphid = '¤graphique(' . $id . ')¤';
+            if ($graphiqueRepository->find(intval($id))) {
+                $Texte = str_replace($graphid, $this->renderGraphique($graphiqueRepository->find(intval($id)), $request), $Texte);
+            } else {
+                $Texte = str_replace($graphid, '', $Texte);
+                $this->logger->error("Graphique avec le numéro $id dans l'article avec l'id:" . $objetSelect->getId() . "n'existe pas", [ucfirst($objet) => $Texte,]);
+            }
+        }
+        // /* -------------------------- ajout du selection (1 par page) -------------------------- */
+        // $start = 0;
+        // foreach (StringHelper::extractAll($Texte, 0, 'selection(', ')¤') as $id) {
+        //     $start = strpos($Texte, '¤)', $start) + 2;
+        //     if ($start == false) {
+        //         $start = strlen($Texte);
+        //     }
+        //     $graphid = '¤selection(' . $id . ')¤';
+        //     if ($selectionRepository->find(intval($id))) {
+        //         $Texte = str_replace($graphid, $this->renderSelection($selectionRepository->find(intval($id)), $request), $Texte);
+        //     } else {
+        //         $Texte = str_replace($graphid, '', $Texte);
+        //         $this->logger->error("Selection avec le numéro $id dans l'article avec l'id:" . $objetSelect->getId() . "n'existe pas", [ucfirst($objet) => $Texte,]);
+        //     }
+        // }
+        return $Texte;
     }
 }
