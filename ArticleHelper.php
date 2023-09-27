@@ -104,7 +104,7 @@ class ArticleHelper
         return $article;
     }
 
-    public static function imgToSrcset($texte): ?string
+    public static function imgToSrcset($texte, CacheManager $imagineCacheManager, FilterManager $filtermanager): ?string
     {
         $redimensionnement = 0;
         //on vérifie que texte est un html
@@ -339,7 +339,7 @@ class ArticleHelper
         // Calculer le temps approximatif de lecture en minutes
         return ceil($wordCount / $wordsPerMinute);
     }
-    public function getrendu($objetSelect)
+    public static function getrendu($objetSelect)
     {
 
         $Texte = $objetSelect->getContenu();
@@ -366,9 +366,7 @@ class ArticleHelper
         //si øsommaire est dans le texte
         $Texte = \str_replace('øsommaireø', $sommaire, $Texte);
         $Texte = ArticleHelper::addLinkVideos($Texte);
-        //$Texte = ArticleHelper::addLinkGlossaire($Texte, $glossaireRepository);
         $Texte = \str_replace('øtitreø', $objetSelect->getTitre(), $Texte);
-        //$Texte = ArticleHelper::imgToSrcset($Texte, $imagineCacheManager, $filtermanager);
         $Texte = ArticleHelper::rmTableStyle($Texte);
         $Texte = ArticleHelper::addTableClass($Texte);
         $Texte = ArticleHelper::removeRoot($Texte);
