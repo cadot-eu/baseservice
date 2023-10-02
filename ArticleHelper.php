@@ -374,21 +374,7 @@ class ArticleHelper
         $Texte = ArticleHelper::convertimgtoclickable($Texte);
 
 
-        /* -------------------------- ajout des graphiques -------------------------- */
-        $start = 0;
-        foreach (StringHelper::extractAll($Texte, 0, '¤graphique(', ')¤') as $id) {
-            $start = strpos($Texte, '¤)', $start) + 2;
-            if ($start == false) {
-                $start = strlen($Texte);
-            }
-            $graphid = '¤graphique(' . $id . ')¤';
-            if ($graphiqueRepository->find(intval($id))) {
-                $Texte = str_replace($graphid, $this->renderGraphique($graphiqueRepository->find(intval($id)), $request), $Texte);
-            } else {
-                $Texte = str_replace($graphid, '', $Texte);
-                $this->logger->error("Graphique avec le numéro $id dans l'article avec l'id:" . $objetSelect->getId() . "n'existe pas", [ucfirst($objet) => $Texte,]);
-            }
-        }
+
         // /* -------------------------- ajout du selection (1 par page) -------------------------- */
         // $start = 0;
         // foreach (StringHelper::extractAll($Texte, 0, 'selection(', ')¤') as $id) {
