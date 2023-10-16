@@ -185,6 +185,7 @@ class ToolsHelper
     }
     public static function setSlug(EntityManagerInterface $em, $entity)
     {
+
         //$objetEntity = 'App\Entity\\' . ucfirst($entity);
         //$repo = $em->getRepository($entity);
         return $entity->setSlug(ToolsHelper::getSlug($em, $entity));
