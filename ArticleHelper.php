@@ -219,24 +219,7 @@ class ArticleHelper
         }
     }
 
-    //fonction qui supprime les racines des liens des href
-    public static function removeRoot($texte)
-    {
-        $crawler = new Crawler($texte);
-        if ($crawler->count() > 0) {
-            foreach ($crawler->filter('a') as $node) {
-                //@var node $node
-                $href = $node->getAttribute('href');
 
-                if (strpos($href, 'http') !== false && strpos($href, 'picbleu.fr') !== false) {
-                    $node->setAttribute('href', substr($href, strpos($href, '/', 8)));
-                }
-            }
-            return $crawler->filter('body')->html();
-        } else {
-            return $texte;
-        }
-    }
     public static function datasrcToSrc($texte)
     {
         return str_replace('data-src', 'src', $texte);
