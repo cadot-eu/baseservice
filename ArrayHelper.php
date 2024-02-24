@@ -26,52 +26,42 @@ class ArrayHelper
      * @param a The index of the element to move.
      * @param b The index of the element to move.
      */
-    static public function moveElement($array, $a, $b)
+    static public function moveElement($array, $a, $b, $champ = 'ordre')
     {
+        //on teste si l'element est un objet
+        if (is_object($array[$a])) {
+            return self::moveElementInObjet($array, $a, $b, $champ);
+        }
         $out = array_splice($array, $a, 1);
         array_splice($array, $b, 0, $out);
         return $array;
     }
 
-    static public function moveElementInObjet($array, $a, $b, $champ = 'ordre')
+    static public function moveElementInObjet($array, $dep, $pos, $champ = 'ordre')
     {
+        $id = $array[$dep]->getId();
         $get = 'get' . \ucfirst($champ);
         $set = 'set' . \ucfirst($champ);
 
-        // Trouver l'objet à déplacer
-        $objetA = null;
-        $indexA = null;
-        foreach ($array as $index => $objet) {
-            if ($objet->$get() == $a) {
-                $objetA = $objet;
-                $indexA = $index;
+        // Range le tableau par $champ
+        usort($array, function ($a, $b) use ($get) {
+            return $a->$get() <=> $b->$get();
+        });
+
+        // Modifie la position de l'élément sélectionné
+        foreach ($array as $key => $value) {
+            if ($value->getId() == $id) {
+                array_splice($array, $key, 1); // Retire l'élément du tableau
+                array_splice($array, $pos, 0, [$value]); // Insère l'élément à la nouvelle position
                 break;
             }
         }
 
-        if ($objetA) {
-            // Mettre à jour l'ordre de l'objet déplacé
-            $objetA->$set($b);
-
-            // Mettre à jour l'ordre des autres objets
-            foreach ($array as $index => $objet) {
-                if ($index != $indexA) {
-                    $currentOrder = $objet->$get();
-                    if ($a < $b) {
-                        // Si l'objet a été déplacé vers le bas, décrémenter l'ordre des objets situés entre l'ancienne et la nouvelle position
-                        if ($currentOrder > $a && $currentOrder <= $b) {
-                            $objet->$set($currentOrder - 1);
-                        }
-                    } else {
-                        // Si l'objet a été déplacé vers le haut, incrémenter l'ordre des objets situés entre l'ancienne et la nouvelle position
-                        if ($currentOrder < $a && $currentOrder >= $b) {
-                            $objet->$set($currentOrder + 1);
-                        }
-                    }
-                }
-            }
+        // Met à jour les positions après le déplacement
+        foreach ($array as $key => $value) {
+            $value->$set($key);
         }
 
-        return ($array); // Vérifier si les ordres ont été mis à jour correctement
+        return $array; // Retourne le tableau mis à jour
     }
 }
