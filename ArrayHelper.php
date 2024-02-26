@@ -39,6 +39,7 @@ class ArrayHelper
 
     static public function moveElementInObjet($array, $dep, $pos, $champ = 'ordre')
     {
+        if (!$champ) $champ = 'ordre'; //pour le cas ou on vient de moveElement
         $id = $array[$dep]->getId();
         $get = 'get' . \ucfirst($champ);
         $set = 'set' . \ucfirst($champ);
