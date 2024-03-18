@@ -67,7 +67,7 @@ class StringHelper
      * 
      * @return the string between the start and end strings.
      */
-    static public function extract($str, $pos, $start, $end = null): string|bool
+    static public function extract($str, $pos = 0, $start = '', $end = null): string|bool
     {
         if ($end == null) $end = $start;
         $sub = strpos($str, $start, $pos); //on cherche la position du départ dans la chaine
