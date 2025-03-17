@@ -90,33 +90,7 @@ class ToolsHelper
         }
     }
 
-    public static function knpChampsRecherche($entity)
-    {
-        $objetEntity = 'App\Entity\\' . ucfirst($entity);
-        $reflexion = new ReflectionClass(new $objetEntity());
-        if ($reflexion->hasProperty('ordre')) {
-            $ordre = 'a.ordre';
-        } else {
-            $ordre = 'a.vues';
-        }
-        //on regarde si on a mis search dans les annotations
-        $doc = new ParserDocblock($entity);
-        $IDOptions = $doc->getOptions()['id'];
-        //si on a search dans id
-        if (isset($IDOptions['search']) && $search = array_key_first($IDOptions['search'])) {
-            $clean = trim(str_replace(["'", "[", "]"], "", $search));
-            return $clean;
-        }
-        $champs = [];
-        foreach ($reflexion->getProperties() as $propertie) {
-            if (
-                !in_array($propertie->getName(), ['updatedAt', 'createdAt', 'deletedAt', 'slug'])
-            ) {
-                $champs[] = $propertie->getName();
-            }
-        }
-        return implode(',', $champs);
-    }
+
     public static function getSlug(EntityManagerInterface $em, $entity): string
     {
         //$this->logActivity('persist', $args);
